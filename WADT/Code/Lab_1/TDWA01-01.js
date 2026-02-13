@@ -1,6 +1,9 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 const PORT = 40000;
+const JSON_BUFFER = {};
 
 
 function compute(op,x,y){
@@ -24,7 +27,6 @@ function compute(op,x,y){
 
 app.get('/NGINX-test',async(req,res)=>{
     try{
-
     }
     catch(err){
        if(err.code=='ENOENT'){
@@ -34,3 +36,10 @@ app.get('/NGINX-test',async(req,res)=>{
        return res.status(500).json({error:"Internal server error"});
     }
 });
+
+
+
+
+app.listen(PORT,()=>{
+    console.log(`Server listening on http://localhost:${PORT}`);
+})
