@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="TDWA02-01.css" />
+  <title>TDWA02</title>
+</head>
+<body>
+  <main class="container">
+    <section class="fetch-card" id="get-card">
+      <header class="card-header">
+        <h3>GET</h3>
+        <button class="fetch-button btn-get" data-method="GET" onclick="clickGET()">Send</button>
+      </header>
+      <label class="input-label">Response JSON</label>
+      <div class="result result-get" data-role="result"></div>
+    </section>
+
+    <section class="fetch-card" id="post-card">
+      <header class="card-header">
+        <h3>POST</h3>
+        <button class="fetch-button btn-post" data-method="POST" onclick="clickPOST()">Send</button>
+      </header>
+      <label class="input-label">Request JSON</label>
+      <textarea class="json-input input-post" placeholder='{"op":add,"X":"1","Y":"2"}' spellcheck="false" rows="6"></textarea>
+      <label class="input-label">Response JSON</label>
+      <div class="result result-post" data-role="result"></div>
+    </section>
+
+    <section class="fetch-card" id="put-card">
+      <header class="card-header">
+        <h3>PUT</h3>
+        <button class="fetch-button btn-put" data-method="PUT" onclick="clickPUT()">Send</button>
+      </header>
+      <label class="input-label">Request JSON</label>
+      <textarea class="json-input input-put" placeholder='{"op":add,"X":"1","Y":"2"}' spellcheck="false" rows="6"></textarea>
+      <label class="input-label">Response JSON</label>
+      <div class="result result-put" data-role="result"></div>
+    </section>
+
+    <section class="fetch-card" id="delete-card">
+      <header class="card-header">
+        <h3>DELETE</h3>
+        <button class="fetch-button btn-delete" data-method="DELETE" onclick="clickDELETE()">Send</button>
+      </header>
+      <label class="input-label">Response JSON</label>
+      <div class="result result-delete" data-role="result"></div>
+    </section>
+  </main>
+
+  <script src="TDWA02-01.js"></script>
+</body>
+</html>
