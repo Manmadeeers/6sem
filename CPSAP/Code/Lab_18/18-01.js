@@ -3,9 +3,7 @@ const seq = require('sequelize');
 const ted = require('tedious');
 const fs = require('fs');
 const path = require('path');
-const { type } = require('os');
-const { stringify } = require('querystring');
-const { error } = require('console');
+const { readUsVarByte } = require('tedious/lib/token/helpers');
 
 const PORT = 3000;
 
@@ -30,6 +28,14 @@ const PayloadChecker = (payload, res) => {
 const ErrorHandler = (err, res, table, method) => {
     console.error(`${table} ${method} ERROR: `, err);
     return res.status(500).json({ error: `Internal server error: ${err}` });
+}
+
+const DeleteCodeChecker = (rawCode, res,) => {
+    const code = decodeURIComponent(rawCode);
+    if (!code || code.length < 2) {
+        return res.status(400).json({ error: "Bad request. Faculty code was invalid" });
+    }
+    return code;
 }
 
 
@@ -332,16 +338,16 @@ app.put('/api/subjects', async (req, res) => {
                 orm.Subject.findAll({
                     where: { subject: subject }
                 })
-                .then(result=>{
-                    console.log("Data result: ",result);
-                    return res.status(200).json(result);
-                })
-                .catch(err=>{
-                    throw new Error(err);
-                });
+                    .then(result => {
+                        console.log("Data result: ", result);
+                        return res.status(200).json(result);
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    });
 
             })
-            .catch(err=>{
+            .catch(err => {
                 throw new Error(err);
             });
     }
@@ -350,54 +356,222 @@ app.put('/api/subjects', async (req, res) => {
     }
 });
 
-app.put('/api/auditoriumstypes',async(req,res)=>{
-    try{
+app.put('/api/auditoriumstypes', async (req, res) => {
+    try {
         const payload = req.body;
 
-        PayloadChecker(payload,res);
+        PayloadChecker(payload, res);
 
-        const {auditorium_type,auditorium_type_name} = payload;
-        if(!auditorium_type||typeof(auditorium_type)!='string'||!auditorium_type_name||typeof(auditorium_type_name)!='string'){
-            return res.status(400).json({error:"Bad request. Payload fields were invalid"});
+        const { auditorium_type, auditorium_type_name } = payload;
+        if (!auditorium_type || typeof (auditorium_type) != 'string' || !auditorium_type_name || typeof (auditorium_type_name) != 'string') {
+            return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
         await orm.Auditorium_type.update(
-            {auditorium_type_name:auditorium_type_name},
-            {where:{auditorium_type:auditorium_type}}
+            { auditorium_type_name: auditorium_type_name },
+            { where: { auditorium_type: auditorium_type } }
         )
-        .then(task=>{
-            console.log("Result: ",task);
+            .then(task => {
+                console.log("Result: ", task);
 
-            orm.Auditorium_type.findAll({
-                where:{auditorium_type:auditorium_type}
+                orm.Auditorium_type.findAll({
+                    where: { auditorium_type: auditorium_type }
+                })
+                    .then(result => {
+                        console.log("Data result: ", result);
+                        return res.status(200).json(result);
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    });
             })
-            .then(result=>{
-                console.log("Data result: ",result);
-                return res.status(200).json(result);
-            })
-            .catch(err=>{
+            .catch(err => {
                 throw new Error(err);
             });
-        })
-        .catch(err=>{
-            throw new Error(err);
-        });
     }
-    catch(err){
-        ErrorHandler(err,res,"AUDITORIUMS_TYPES","PUT");
+    catch (err) {
+        ErrorHandler(err, res, "AUDITORIUMS_TYPES", "PUT");
     }
 });
 
-app.put('/api/auditoriums',async(req,res)=>{
-    try{
+app.put('/api/auditoriums', async (req, res) => {
+    try {
         const payload = req.body;
 
-        PayloadChecker(payload,res);
+        PayloadChecker(payload, res);
 
-        const {}
+        const { auditorium, auditorium_name, auditorium_capacity, auditorium_type } = payload;
+
+        await orm.Auditorium.update(
+            { auditorium_name, auditorium_capacity, auditorium_type },
+            { where: { auditorium: auditorium } }
+        )
+            .then(task => {
+                console.log("Result: ", task);
+                orm.Auditorium.findAll({
+                    where: { auditorium: auditorium }
+                })
+                    .then(result => {
+                        return res.status(200).json(result);
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    });
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
+    }
+    catch (err) {
+        ErrorHandler(err, res, "AUDITORIUMS", "PUT");
+    }
+});
+
+app.delete('/api/faculties/:code', async (req, res) => {
+    try {
+        let code = DeleteCodeChecker(req.params.code, res);
+
+        await orm.Faculty.findAll({
+            where: { faculty: code }
+        })
+            .then(result => {
+                console.log("Deleting: ", result)
+                if (result.length < 1) {
+                    return res.status(404).send({ error: `Could not find faculty with code ${code}` });
+                }
+
+                orm.Faculty.destroy({
+                    where: { faculty: code }
+                })
+                    .then(task => {
+                        console.log("Deletions result: ", res);
+                        return res.status(200).json({
+                            result: task,
+                            payload: result
+                        });
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    })
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
+
+
+    }
+    catch (err) {
+        ErrorHandler(err, res, "FACULTY", "DELETE");
+    }
+});
+
+
+app.delete('/api/pulpits/:code', async (req, res) => {
+    try {
+        let code = DeleteCodeChecker(req.params.code);
+
+        await orm.Pulpit.findAll({
+            where:{pulpit:code}
+        })
+        .then(result=>{
+            console.log("Deleting: ",result);
+            if(result.length<1){
+                return res.status(404).json({error:`Could not find PULPIT with code ${code}`});
+            }
+
+            orm.Pulpit.destroy({
+                where:{pulpit:code}
+            })
+            .then(task=>{
+                console.log("Deletion result: ",task);
+                return res.status(200).json({
+                    result:task,
+                    payload:result
+                });
+            })
+            .catch(err=>{
+                throw new Error(err);
+            })
+        })
+        .catch(err=>{
+            throw new Error(err);
+        })
+    }
+    catch (err) {
+        ErrorHandler(err, res, "PULPIT", "DELETE");
+    }
+});
+
+app.delete('/api/subject/:code',async(req,res)=>{
+    try{
+        let code = DeleteCodeChecker(req.params.code,res);
+
+        await orm.Subject.findAll({
+            where:{subject:code}
+        })
+        .then(result=>{
+            console.log("Deleting: ",result)
+            if(result.length<1){
+                return res.status(404).json({error:`Could not find SUBJECT with code ${code}`});
+            }
+
+            orm.Subject.destroy({
+                where:{subject:code}
+            })
+            .then(task=>{
+                console.log("Deletion result: ",task);
+                return res.status(200).json({
+                    result:task,
+                    payload:result
+                });
+            })
+            .catch(err=>{
+                throw new Error(err);
+            })
+        })
+        .catch(err=>{
+            throw new Error(err);
+        })
     }
     catch(err){
-        ErrorHandler(err,res,"AUDITORIUMS","PUT");
+        ErrorHandler(err,res,"SUBJECT","DELETE");
+    }
+});
+
+
+app.delete('/api/auditoriumstypes/:code',async(req,res)=>{
+    try{
+        let code =DeleteCodeChecker(req.params.code,res);
+
+        await orm.Auditorium_type.findAll({
+            where:{auditorium_type:code}
+        })
+        .then(result=>{
+            console.log("Deleting: ",result);
+            if(result.length<1){
+                return res.status(404).json({error:`Could not find Audotorium type with code ${code}`});
+            }
+
+            orm.Auditorium_type.destroy({
+                where:{auditorium_type:code}
+            })
+            .then(task=>{
+                console.log("Deletion result: ",task);
+                return res.status(200).json({
+                    result:task,
+                    payload:result
+                });
+            })
+            .catch(err=>{
+                throw new Error(err);
+            })
+        })
+        .catch(err=>{
+            throw new Error(err);
+        })
+    }
+    catch(err){
+        ErrorHandler(err,res,"AUDITORIUMS_TYPES","DELETE");
     }
 })
 
