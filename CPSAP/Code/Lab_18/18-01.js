@@ -3,7 +3,7 @@ const seq = require('sequelize');
 const ted = require('tedious');
 const fs = require('fs');
 const path = require('path');
-const { readUsVarByte } = require('tedious/lib/token/helpers');
+const strict = require('assert/strict');
 
 const PORT = 3000;
 
@@ -23,6 +23,24 @@ const PayloadChecker = (payload, res) => {
     if (!payload || typeof (payload) != 'object') {
         return res.status(400).json({ error: "Bad request. Payload was invalid" });
     }
+}
+
+const TypeChecker = (fieldsArray, typesArray) => {
+    if (fieldsArray.length != typesArray.length) {
+        throw new Error("Failed to check payload fields types. Arrays lengths were not equal");
+    }
+    let counter = 0;
+    fieldsArray.forEach(field => {
+        if (!field || typeof (field) != typesArray[counter]) {
+            console.log("Type checker not passed");
+            return false;
+        }
+        counter++;
+    });
+
+    console.log("Type checker passed");
+    return true;
+
 }
 
 const ErrorHandler = (err, res, table, method) => {
@@ -135,23 +153,27 @@ app.post('/api/faculties', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { faculty, faculty_name } = payload;
-        if (!faculty || typeof (faculty) != 'string' || !faculty_name || typeof (faculty_name) != 'string') {
+
+        if (!TypeChecker([faculty, faculty_name], ['string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
-        orm.Faculty.create({ faculty: faculty, faculty_name: faculty_name })
+
+        await orm.Faculty.create({ faculty: faculty, faculty_name: faculty_name })
             .then(task => {
                 console.log(task.dataValues);
                 return res.status(201).json(task.dataValues);
             })
             .catch(err => {
-                throw new Error(err);
+                return res.status(409).json({ error: "Conflict. Data already exist" });
             });
     }
     catch (err) {
         ErrorHandler(err, res, "FACULTIES", "POST");
     }
 });
+
+
 
 
 app.post('/api/pulpits', async (req, res) => {
@@ -162,12 +184,11 @@ app.post('/api/pulpits', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { pulpit, pulpit_name, faculty } = payload;
-        if (!pulpit || typeof (pulpit) != 'string' || !pulpit_name || typeof (pulpit_name) != 'string' || !faculty || typeof (faculty) != 'string') {
+
+        if (!TypeChecker([pulpit, pulpit_name, faculty], ['string', 'string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
-
-
-        orm.Pulpit.create({ pulpit: pulpit, pulpit_name: pulpit_name, faculty: faculty })
+        await orm.Pulpit.create({ pulpit: pulpit, pulpit_name: pulpit_name, faculty: faculty })
             .then(task => {
                 console.log(task.dataValues);
                 return res.status(201).json(task.dataValues);
@@ -189,11 +210,11 @@ app.post('/api/subjects', async (req, res) => {
 
         const { subject, subject_name, pulpit } = payload;
 
-        if (!subject || typeof (subject) != 'string' || !subject_name || typeof (subject_name) != 'string' || !pulpit || typeof (pulpit) != 'string') {
+        if (!TypeChecker([subject, subject_name, pulpit], ['string', 'string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
-        orm.Subject.create({ subject: subject, subject_name: subject_name, pulpit: pulpit })
+        await orm.Subject.create({ subject: subject, subject_name: subject_name, pulpit: pulpit })
             .then(task => {
                 console.log(task.dataValues);
                 return res.status(201).json(task.dataValues);
@@ -214,11 +235,11 @@ app.post('/api/auditoriumstypes', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { auditorium_type, auditorium_type_name } = payload;
-        if (!auditorium_type || typeof (auditorium_type) != 'string' || !auditorium_type_name || typeof (auditorium_type_name) != 'string') {
+        if (!TypeChecker([auditorium_type, auditorium_type_name], ['string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
-        orm.Auditorium_type.create({ auditorium_type: auditorium_type, auditorium_type_name: auditorium_type_name })
+        await orm.Auditorium_type.create({ auditorium_type: auditorium_type, auditorium_type_name: auditorium_type_name })
             .then(task => {
                 console.log(task.dataValues);
                 return res.status(201).json(task.dataValues);
@@ -241,11 +262,11 @@ app.post('/api/auditoriums', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { auditorium, auditorium_name, auditorium_capacity, auditorium_type } = payload;
-        if (!auditorium || typeof (auditorium) != 'string' || !auditorium_name || typeof (auditorium_name) != 'string' || !auditorium_capacity || typeof (auditorium_capacity) != 'number' || !auditorium_type || typeof (auditorium_type) != 'string') {
+        if (!TypeChecker([auditorium, auditorium_name, auditorium_capacity, auditorium_type], ['string', 'string', 'number', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
-        orm.Auditorium.create({ auditorium: auditorium, auditorium_name: auditorium_name, auditorium_capacity: auditorium_capacity, auditorium_type: auditorium_type })
+        await orm.Auditorium.create({ auditorium: auditorium, auditorium_name: auditorium_name, auditorium_capacity: auditorium_capacity, auditorium_type: auditorium_type })
             .then(task => {
                 console.log(task.dataValues);
                 return res.status(201).json(task.dataValues);
@@ -266,7 +287,7 @@ app.put('/api/faculties', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { faculty, faculty_name } = payload;
-        if (!faculty || typeof (faculty) != 'string' || !faculty_name || typeof (faculty_name) != 'string') {
+        if (!TypeChecker([faculty, faculty_name], ['string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
@@ -276,7 +297,10 @@ app.put('/api/faculties', async (req, res) => {
         )
             .then(task => {
                 console.log("Result: ", task);
-                return res.status(200).json({ result: `Operation succeeded with code ${task}` });
+                return res.status(200).json({
+                    result:task,
+                    payload:payload
+                });
             })
             .catch(err => {
                 throw new Error(err);
@@ -294,7 +318,7 @@ app.put('/api/pulpits', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { pulpit, pulpit_name, faculty } = payload;
-        if (!pulpit || typeof (pulpit) != 'string' || !pulpit_name || typeof (pulpit_name) != 'string' || !faculty || typeof (faculty) != 'string') {
+        if (!TypeChecker([pulpit, pulpit_name, faculty], ['string', 'string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
@@ -304,7 +328,10 @@ app.put('/api/pulpits', async (req, res) => {
         )
             .then(task => {
                 console.log("Result: ", task);
-                return res.status(200).json({ result: `Operation succeded with code ${task}` });
+                return res.status(200).json({
+                    result:task,
+                    payload:payload
+                });
             })
             .catch(err => {
                 throw new Error(err);
@@ -324,7 +351,8 @@ app.put('/api/subjects', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { subject, subject_name, pulpit } = payload;
-        if (!subject || typeof (subject) != 'string' || !subject_name || typeof (subject_name) != 'string' || !pulpit || typeof (pulpit) != 'string') {
+
+        if (!TypeChecker([subject, subject_name, pulpit], ['string', 'string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
@@ -340,7 +368,10 @@ app.put('/api/subjects', async (req, res) => {
                 })
                     .then(result => {
                         console.log("Data result: ", result);
-                        return res.status(200).json(result);
+                        return res.status(200).json({
+                            result: task,
+                            payload: JSON.stringify(result, null, 2)
+                        });
                     })
                     .catch(err => {
                         throw new Error(err);
@@ -363,7 +394,7 @@ app.put('/api/auditoriumstypes', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { auditorium_type, auditorium_type_name } = payload;
-        if (!auditorium_type || typeof (auditorium_type) != 'string' || !auditorium_type_name || typeof (auditorium_type_name) != 'string') {
+        if (!TypeChecker([auditorium_type, auditorium_type_name], ['string', 'string'])) {
             return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
         }
 
@@ -379,7 +410,10 @@ app.put('/api/auditoriumstypes', async (req, res) => {
                 })
                     .then(result => {
                         console.log("Data result: ", result);
-                        return res.status(200).json(result);
+                        return res.status(200).json({
+                            result: task,
+                            payload: JSON.stringify(result, null, 2)
+                        });
                     })
                     .catch(err => {
                         throw new Error(err);
@@ -401,6 +435,9 @@ app.put('/api/auditoriums', async (req, res) => {
         PayloadChecker(payload, res);
 
         const { auditorium, auditorium_name, auditorium_capacity, auditorium_type } = payload;
+        if (!TypeChecker([auditorium, auditorium_name, auditorium_capacity, auditorium_type], ['string', 'string', 'number', 'string'])) {
+            return res.status(400).json({ error: "Bad request. Payload fields were invalid" });
+        }
 
         await orm.Auditorium.update(
             { auditorium_name, auditorium_capacity, auditorium_type },
@@ -412,7 +449,10 @@ app.put('/api/auditoriums', async (req, res) => {
                     where: { auditorium: auditorium }
                 })
                     .then(result => {
-                        return res.status(200).json(result);
+                        return res.status(200).json({
+                            result: task,
+                            payload: JSON.stringify(result, null, 2)
+                        });
                     })
                     .catch(err => {
                         throw new Error(err);
@@ -471,107 +511,107 @@ app.delete('/api/pulpits/:code', async (req, res) => {
         let code = DeleteCodeChecker(req.params.code);
 
         await orm.Pulpit.findAll({
-            where:{pulpit:code}
+            where: { pulpit: code }
         })
-        .then(result=>{
-            console.log("Deleting: ",result);
-            if(result.length<1){
-                return res.status(404).json({error:`Could not find PULPIT with code ${code}`});
-            }
+            .then(result => {
+                console.log("Deleting: ", result);
+                if (result.length < 1) {
+                    return res.status(404).json({ error: `Could not find PULPIT with code ${code}` });
+                }
 
-            orm.Pulpit.destroy({
-                where:{pulpit:code}
+                orm.Pulpit.destroy({
+                    where: { pulpit: code }
+                })
+                    .then(task => {
+                        console.log("Deletion result: ", task);
+                        return res.status(200).json({
+                            result: task,
+                            payload: result
+                        });
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    })
             })
-            .then(task=>{
-                console.log("Deletion result: ",task);
-                return res.status(200).json({
-                    result:task,
-                    payload:result
-                });
-            })
-            .catch(err=>{
+            .catch(err => {
                 throw new Error(err);
             })
-        })
-        .catch(err=>{
-            throw new Error(err);
-        })
     }
     catch (err) {
         ErrorHandler(err, res, "PULPIT", "DELETE");
     }
 });
 
-app.delete('/api/subject/:code',async(req,res)=>{
-    try{
-        let code = DeleteCodeChecker(req.params.code,res);
+app.delete('/api/subject/:code', async (req, res) => {
+    try {
+        let code = DeleteCodeChecker(req.params.code, res);
 
         await orm.Subject.findAll({
-            where:{subject:code}
+            where: { subject: code }
         })
-        .then(result=>{
-            console.log("Deleting: ",result)
-            if(result.length<1){
-                return res.status(404).json({error:`Could not find SUBJECT with code ${code}`});
-            }
+            .then(result => {
+                console.log("Deleting: ", result)
+                if (result.length < 1) {
+                    return res.status(404).json({ error: `Could not find SUBJECT with code ${code}` });
+                }
 
-            orm.Subject.destroy({
-                where:{subject:code}
+                orm.Subject.destroy({
+                    where: { subject: code }
+                })
+                    .then(task => {
+                        console.log("Deletion result: ", task);
+                        return res.status(200).json({
+                            result: task,
+                            payload: result
+                        });
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    })
             })
-            .then(task=>{
-                console.log("Deletion result: ",task);
-                return res.status(200).json({
-                    result:task,
-                    payload:result
-                });
-            })
-            .catch(err=>{
+            .catch(err => {
                 throw new Error(err);
             })
-        })
-        .catch(err=>{
-            throw new Error(err);
-        })
     }
-    catch(err){
-        ErrorHandler(err,res,"SUBJECT","DELETE");
+    catch (err) {
+        ErrorHandler(err, res, "SUBJECT", "DELETE");
     }
 });
 
 
-app.delete('/api/auditoriumstypes/:code',async(req,res)=>{
-    try{
-        let code =DeleteCodeChecker(req.params.code,res);
+app.delete('/api/auditoriumstypes/:code', async (req, res) => {
+    try {
+        let code = DeleteCodeChecker(req.params.code, res);
 
         await orm.Auditorium_type.findAll({
-            where:{auditorium_type:code}
+            where: { auditorium_type: code }
         })
-        .then(result=>{
-            console.log("Deleting: ",result);
-            if(result.length<1){
-                return res.status(404).json({error:`Could not find Audotorium type with code ${code}`});
-            }
+            .then(result => {
+                console.log("Deleting: ", result);
+                if (result.length < 1) {
+                    return res.status(404).json({ error: `Could not find Audotorium type with code ${code}` });
+                }
 
-            orm.Auditorium_type.destroy({
-                where:{auditorium_type:code}
+                orm.Auditorium_type.destroy({
+                    where: { auditorium_type: code }
+                })
+                    .then(task => {
+                        console.log("Deletion result: ", task);
+                        return res.status(200).json({
+                            result: task,
+                            payload: result
+                        });
+                    })
+                    .catch(err => {
+                        throw new Error(err);
+                    })
             })
-            .then(task=>{
-                console.log("Deletion result: ",task);
-                return res.status(200).json({
-                    result:task,
-                    payload:result
-                });
-            })
-            .catch(err=>{
+            .catch(err => {
                 throw new Error(err);
             })
-        })
-        .catch(err=>{
-            throw new Error(err);
-        })
     }
-    catch(err){
-        ErrorHandler(err,res,"AUDITORIUMS_TYPES","DELETE");
+    catch (err) {
+        ErrorHandler(err, res, "AUDITORIUMS_TYPES", "DELETE");
     }
 })
 
