@@ -36,6 +36,7 @@ create table AUDITORIUM_TYPE(
 
 
 
+
 create table AUDITORIUM(
 	AUDITORIUM nvarchar(20) primary key,
 	AUDITORIUM_NAME nvarchar(100) not null,

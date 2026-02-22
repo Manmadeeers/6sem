@@ -370,7 +370,7 @@ app.put('/api/subjects', async (req, res) => {
                         console.log("Data result: ", result);
                         return res.status(200).json({
                             result: task,
-                            payload: JSON.stringify(result, null, 2)
+                            payload: result
                         });
                     })
                     .catch(err => {
@@ -412,7 +412,7 @@ app.put('/api/auditoriumstypes', async (req, res) => {
                         console.log("Data result: ", result);
                         return res.status(200).json({
                             result: task,
-                            payload: JSON.stringify(result, null, 2)
+                            payload: result
                         });
                     })
                     .catch(err => {
@@ -451,7 +451,7 @@ app.put('/api/auditoriums', async (req, res) => {
                     .then(result => {
                         return res.status(200).json({
                             result: task,
-                            payload: JSON.stringify(result, null, 2)
+                            payload: result
                         });
                     })
                     .catch(err => {
@@ -613,7 +613,43 @@ app.delete('/api/auditoriumstypes/:code', async (req, res) => {
     catch (err) {
         ErrorHandler(err, res, "AUDITORIUMS_TYPES", "DELETE");
     }
-})
+});
+
+app.delete('/api/auditoriums/:code',async(req,res)=>{
+    try{
+        let code = DeleteCodeChecker(req.params.code,res);
+
+        await orm.Auditorium.findAll({
+            where:{auditorium:code}
+        })
+        .then(result=>{
+            console.log("Deleting: ",result);
+            if(result.length<1){
+                return res.status(404).json({error:`Could not fild Auditorium with code ${code}`});
+            }
+
+            orm.Auditorium.destroy({
+                where:{auditorium:code}
+            })
+            .then(task=>{
+                console.log("Deletion result: ",task);
+                return res.status(200).json({
+                    result:task,
+                    payload:result
+                });
+            })
+            .catch(err=>{
+                throw new Error(err);
+            })
+        })
+        .catch(err=>{
+            throw new Error(err);
+        })
+    }
+    catch(err){
+        ErrorHandler(err,res,"AUDITORIUM","DELETE");
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
