@@ -50,6 +50,7 @@ const ErrorHandler = (err, res, table, method) => {
 
 const DeleteCodeChecker = (rawCode, res,) => {
     const code = decodeURIComponent(rawCode);
+    console.log("Decoded URI component: ",code);
     if (!code || code.length < 2) {
         return res.status(400).json({ error: "Bad request. Faculty code was invalid" });
     }
@@ -650,6 +651,42 @@ app.delete('/api/auditoriums/:code',async(req,res)=>{
         ErrorHandler(err,res,"AUDITORIUM","DELETE");
     }
 });
+
+app.delete('/api/subjects/:code',async(req,res)=>{
+    try{
+        let code = DeleteCodeChecker(req.params.code,res);
+
+        await orm.Subject.findAll({
+            where:{subject:code}
+        })
+        .then(result=>{
+            console.log("Deleting: ",result);
+            if(result.length<1){
+                return res.status(404).json({error:`Could not fild subject with code: ${code}`});
+            }
+
+            orm.Subject.destroy({
+                where:{subject:code}
+            })
+            .then(task=>{
+                console.log("Deletion result: ",task);
+                return res.status(200).json({
+                    result:task,
+                    payload:result
+                });
+            })
+            .catch(err=>{
+                throw new Error(err);
+            })
+        })
+        .catch(err=>{
+            throw new Error(err);
+        });
+    }
+    catch(err){
+        ErrorHandler(err,res,"SUBJECTS","DELETE");
+    }
+})
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
