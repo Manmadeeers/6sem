@@ -1,0 +1,14 @@
+[
+    {
+        "id":1,
+        "name":"John Doe",
+        "age":20,
+        "major":"Computer Science"
+    },
+    {
+        "id":2,
+        "name":"Bed Dover",
+        "age":20,
+        "major":"Electrical Engineering"
+    }
+]

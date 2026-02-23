@@ -3,7 +3,6 @@ const seq = require('sequelize');
 const ted = require('tedious');
 const fs = require('fs');
 const path = require('path');
-const strict = require('assert/strict');
 
 const PORT = 3000;
 

@@ -1,31 +1,23 @@
 const express = require('express');
-const ctrlHelper = require('./Controller-Helper');
+const path = require('path');
+const studentRoutes = require('./routes/StudentsRouter.js');
+
 const app = express();
 const PORT = 3000;
 
+app.use(express.urlencoded({extended:true}));
+app.use(express.json());
 
-const router = new (ctrlHelper.MVCRouter)(
-    '/:controller/:action',
-    '/api/controller/:action/:p',
-    '/loc/lex/:controller/:m/:action'
-);
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
-const controllers = new ctrlHelper.MVCControllers(
-    {
-        home: {
-            index: ctrlHelper.home_index,
-            account: ctrlHelper.home_account
-        },
-        calc: {
-            salary: ctrlHelper.calc_salary,
-            trans: ctrlHelper.calc_trans
-        }
-    }
-);
+app.set('view engine','ejs');
+app.set('views',path.join(__dirname,'public'));
 
-const mvc = new ctrlHelper.MVC(router, controllers);
 
-app.get(mvc.router.uri_templates,mvc.use);
+app.
+
+
 
 app.listen(PORT, () => {
     console.log(`Server listening http://localhost:${PORT}`);
