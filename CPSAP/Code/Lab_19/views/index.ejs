@@ -4,115 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../public/css/studentModelStyle.css">
+    
     <title>Students</title>
 </head>
 
 <body>
-    <main class="container">
+    <main>
+        <h2>Students list</h2>
 
-        <h2 class="page-title">Students list</h2>
-
-
-        <% if (students && students.length> 0) { %>
-
-            <ul class="students-list" id="studentsList">
-
-                <% students.forEach(student=> { %>
-
-                    <li class="student-item" data-id="<%= student.id %>">
-
-                        <div class="student-main">
-
-                            <span class="student-id">
-                                <%= student.id %>
-                            </span>
-
-                            <span class="student-name">
-                                <%= student.name %>
-                            </span>
-
-                            <span class="student-age">
-                                <%= student.age ?? '' %>
-                            </span>
-
-                            <span class="student-major">
-                                <%= student.major ?? '' %>
-                            </span>
-
-                        </div>
-
-                        <div class="student-actions">
-
-                            <button class="btn btn-edit" data-id="<%= student.id %>">Edit</button>
-
-                            <button class="btn btn-delete" data-id="<%= student.id %>">Delete</button>
-
-                        </div>
-
-                    </li>
-
-                    <% }) %>
-
-            </ul>
-
-            <% } else { %>
-
-                <p class="empty">No students yet — add one below.</p>
-
-                <ul class="students-list" id="studentsList"></ul>
-
-                <% } %>
+        <% if (students.length>0) { %>
+            <ul>
+                <% students.forEach(student => { %>
+                    <li>
+                        <%= student.id %>:<%= student.name %> <%= student.age %> <%= student.major %>
 
 
-                    <section class="form-wrap">
-
-                        <h3 id="formTitle">Add Student</h3>
-
-                        <form id="studentForm" class="student-form" autocomplete="off">
-
-                            <input type="hidden" id="studentId" name="id" />
-
-
-                            <label class="field">
-
-                                <span class="label">Name</span>
-
-                                <input id="name" name="name" type="text" required maxlength="120" />
-
-                            </label>
-
-
-                            <label class="field">
-
-                                <span class="label">Age</span>
-
-                                <input id="age" name="age" type="number" min="0" />
-
-                            </label>
-
-
-                            <label class="field">
-
-                                <span class="label">Major</span>
-
-                                <input id="major" name="major" type="text" maxlength="80" />
-
-                            </label>
-
-
-                            <div class="form-actions">
-
-                                <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
-
-                                <button type="button" class="btn btn-ghost" id="resetBtn">Reset</button>
-
-                            </div>
-
+                        <form action="/students/<%= student.id %>?_method=PUT" method="post">
+                            <input type="text" name="name" placeholder="New Name">
+                            <input type="number" name="age" placeholder="New Age">
+                            <input type="text" name="major" placeholder="New Major">
+                            <button type="submit">Update</button>
                         </form>
+                        <form action="/students/<%= student.id %>?_method=DELETE" method="post">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <p>No students</p>
+        <% } %>
 
-                    </section>
 
+        <h2>Add a student</h2>
+        <form action="/students" method="post">
+            <input type="text" name="name" placeholder="Enter name">
+            <input type="number" name="age" placeholder="Enter age">
+            <input type="text" name="major" placeholder="Enter major">
+            <button type="submit">Add</button>
+        </form>
     </main>
 </body>
 
