@@ -1,54 +1,60 @@
-const Student = require('../models/StudentsModel');
+using Microsoft.AspNetCore.Mvc;
+using Models;
 
-class StudentsController {
-    getAllStudents(req, res) {
-        res.status(200).json(Student.getAll());
-    }
-
-    getStudentById(req,res){
-        const foundStudent = Student.getById(req.params.id);
-        if(!foundStudent){
-            res.status(404).json({error:"Could not find the requested student"});
+namespace Controllers
+{
+    public class StudentsController : Controller
+    {
+        [HttpGet("/students")]
+        public IActionResult GetAllStudents()
+        {
+            return Ok(Student.GetAll());
         }
-        else{
-            res.status(200).json(foundStudent);
-        }
-    }
 
-    renderStudentsPage(req, res) {
-        res.render('index', { students: Student.getAll() });
-    }
+        [HttpGet("/students/{id}")]
+        public IActionResult GetStudentById(int id)
+        {
+            var foundStudent = Student.GetById(id);
+            if (foundStudent == null)
+                return NotFound(new { error = "Could not find the requested student" });
 
-    createStudent(req, res) {
-        const { name, age, major } = req.body;
-        if (!name || !age || !major) {
-            return res.status(400).json({ error: "Bad request. Payload was invalid" });
+            return Ok(foundStudent);
+        }
 
+        [HttpGet("/students/view")]
+        public IActionResult RenderStudentsPage()
+        {
+            return View("Index", Student.GetAll());
         }
-        Student.create({ name, age, major });
-        res.redirect('/students/view');
-    }
 
-    updateStudent(req, res) {
-        const updatedStudent = Student.update(req.params.id, req.body);
-        if (updatedStudent) {
-            res.redirect('/students/view');
-        }
-        else {
-            res.status(404).json({ error: "Could not find student to update" });
-        }
-    }
+        [HttpPost("/students")]
+        public IActionResult CreateStudent([FromForm] string name, [FromForm] int? age, [FromForm] string major)
+        {
+            if (string.IsNullOrWhiteSpace(name) || age == null || string.IsNullOrWhiteSpace(major))
+                return BadRequest(new { error = "Bad request. Payload was invalid" });
 
-    deleteStudent(req, res) {
-        const result = Student.delete(req.params.id);
-        if (result) {
-            res.redirect('/students/view');
+            Student.Create(new Student { Name = name, Age = age.Value, Major = major });
+            return Redirect("/students/view");
         }
-        else {
-            res.status(404).json({ error: "Could not find student to delete" });
+
+        [HttpPost("/students/update/{id}")]
+        public IActionResult UpdateStudent(int id, [FromForm] Student data)
+        {
+            var updatedStudent = Student.Update(id, data);
+            if (updatedStudent != null)
+                return Redirect("/students/view");
+
+            return NotFound(new { error = "Could not find student to update" });
+        }
+
+        [HttpPost("/students/delete/{id}")]
+        public IActionResult DeleteStudent(int id)
+        {
+            var result = Student.Delete(id);
+            if (result)
+                return Redirect("/students/view");
+
+            return NotFound(new { error = "Could not find student to delete" });
         }
     }
 }
-
-
-module.exports = StudentsController; 
