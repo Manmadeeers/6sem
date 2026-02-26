@@ -1,0 +1,23 @@
+--- Cyrillic FIO (uses ser_text.txt entropy) ---
+FIO: Филипјук Илија Андрејевич
+N_symbols (after preprocessing rules) = 25
+Information using alphabet entropy: I_alpha = 109.528374 bits
+Encoding used for binary form: utf-8, bytes = 48, bits = 384
+Local bit stats for name: P(1)=0.440104, H_bits_local=0.989624 bits/bit
+Source information in binary representation: I_source (I_binary) = 380.015513 bits
+Information in binary representation (H_bits from files) = 380.096523 bits
+p=0.1: capacity C=0.53100441 bits/bit, effective I_eff = 203.905692 bits
+p=0.5: capacity C=0.00000000 bits/bit, effective I_eff = 0.000000 bits
+p=1.0: capacity C=1.00000000 bits/bit, effective I_eff = 380.015513 bits
+
+--- Latin FIO (uses ger_text.txt entropy) ---
+FIO: Ilja Andrejewitsch Filipjuk
+N_symbols (after preprocessing rules) = 27
+Information using alphabet entropy: I_alpha = 115.108847 bits
+Encoding used for binary form: ascii, bytes = 27, bits = 216
+Local bit stats for name: P(1)=0.462963, H_bits_local=0.996038 bits/bit
+Source information in binary representation: I_source (I_binary) = 215.144286 bits
+Information in binary representation (H_bits from files) = 213.804294 bits
+p=0.1: capacity C=0.53100441 bits/bit, effective I_eff = 114.696952 bits
+p=0.5: capacity C=0.00000000 bits/bit, effective I_eff = 0.000000 bits
+p=1.0: capacity C=1.00000000 bits/bit, effective I_eff = 215.144286 bits
