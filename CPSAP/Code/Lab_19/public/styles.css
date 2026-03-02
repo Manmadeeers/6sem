@@ -1,0 +1,111 @@
+:root{
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --danger: #ef4444;
+  --radius: 8px;
+  --shadow: 0 6px 18px rgba(31,41,55,0.06);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 16px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+.header{
+  padding:28px 24px;
+  text-align:center;
+}
+.header h1{margin:0;font-size:28px}
+.header .lead{margin:8px 0 0;color:var(--muted)}
+
+.container{
+  max-width:980px;
+  margin:18px auto;
+  padding:0 16px 48px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.students-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:15px;
+}
+.students-table thead th{
+  text-align:left;
+  padding:10px 12px;
+  border-bottom:1px solid #eef2f7;
+  color:var(--muted);
+  font-weight:600;
+}
+.students-table tbody td{
+  padding:10px 12px;
+  border-bottom:1px solid #f1f5f9;
+  vertical-align:middle;
+}
+
+.actions{display:flex;gap:8px;align-items:center}
+.inline-form{display:inline;margin:0;padding:0}
+
+.btn{
+  display:inline-block;
+  border:0;
+  padding:8px 12px;
+  border-radius:6px;
+  background:transparent;
+  cursor:pointer;
+  color:var(--accent);
+  font-weight:600;
+}
+.btn.small{padding:6px 8px;font-size:13px}
+.btn.primary{background:var(--accent);color:white}
+.btn.danger{background:var(--danger);color:white}
+.btn.muted{background:#f3f4f6;color:var(--muted)}
+
+.stack label{
+  display:block;
+  margin-bottom:10px;
+  font-size:14px;
+  color:var(--muted);
+}
+.stack input[type="text"],
+.stack input[type="number"]{
+  width:100%;
+  padding:10px 12px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #e6edf3;
+  background:#fff;
+  font-size:15px;
+  color:var(--text);
+}
+
+.form-actions{margin-top:8px;display:flex;gap:8px}
+.muted{color:var(--muted)}
+.message{
+  background:#e6f0ff;
+  border:1px solid #cfe0ff;
+  padding:10px 12px;
+  border-radius:6px;
+  margin-bottom:12px;
+  color:#0543a6;
+}
+
+.footer{padding:10px 0;text-align:center;color:var(--muted);font-size:13px}

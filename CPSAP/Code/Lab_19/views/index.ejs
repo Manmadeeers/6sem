@@ -2,48 +2,145 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Students</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>19-01</title>
+    <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body>
-    <main>
-        <h2>Students list</h2>
+    <header class="header">
+        <h1>Students</h1>
+    </header>
 
-        <% if (students.length>0) { %>
-            <ul>
-                <% students.forEach(student => { %>
-                    <li>
-                        <%= student.id %>:<%= student.name %> <%= student.age %> <%= student.major %>
+    <main class="container">
+    
+        <% if (typeof message !=='undefined' ) { %>
+            <div class="message">
+                <%= message %>
+            </div>
+            <% } %>
 
+               
+                <section class="card">
+                    <h2>All students</h2>
+                    <% if (!students || students.length===0) { %>
+                        <p class="muted">No students yet. Use the form below to add one.</p>
+                        <% } else { %>
+                            <table class="students-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Major</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% students.forEach(function(s) { %>
+                                        <tr>
+                                            <td>
+                                                <%= s.id %>
+                                            </td>
+                                            <td>
+                                                <%= s.name %>
+                                            </td>
+                                            <td>
+                                                <%= s.age %>
+                                            </td>
+                                            <td>
+                                                <%= s.major %>
+                                            </td>
+                                            <td class="actions">
+                                                
+                                                <button class="btn small" data-edit-id="<%= s.id %>">Edit</button>
 
-                        <form action="/students/<%= student.id %>?_method=PUT" method="post">
-                            <input type="text" name="name" placeholder="New Name">
-                            <input type="number" name="age" placeholder="New Age">
-                            <input type="text" name="major" placeholder="New Major">
-                            <button type="submit">Update</button>
-                        </form>
-                        <form action="/students/<%= student.id %>?_method=DELETE" method="post">
-                            <button type="submit">Delete</button>
-                        </form>
-                    </li>
-                <% }) %>
-            </ul>
-        <% } else { %>
-            <p>No students</p>
-        <% } %>
+                                                
+                                                <form class="inline-form" method="POST"
+                                                    action="/students/<%= s.id %>?_method=DELETE"
+                                                    onsubmit="return confirm('Delete student <%= s.name %>?')">
+                                                    <button type="submit" class="btn danger small">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
 
+                                     
+                                        <tr class="edit-row" id="edit-row-<%= s.id %>" style="display:none;">
+                                            <td colspan="5">
+                                                <form class="edit-form" method="POST"
+                                                    action="/students/<%= s.id %>?_method=PUT">
+                                                    <label>
+                                                        Name
+                                                        <input name="name" type="text" value="<%= s.name %>" required />
+                                                    </label>
+                                                    <label>
+                                                        Age
+                                                        <input name="age" type="number" value="<%= s.age %>" required />
+                                                    </label>
+                                                    <label>
+                                                        Major
+                                                        <input name="major" type="text" value="<%= s.major %>"
+                                                            required />
+                                                    </label>
+                                                    <div class="form-actions">
+                                                        <button class="btn" type="submit">Save</button>
+                                                        <button class="btn muted" type="button"
+                                                            data-cancel-id="<%= s.id %>">Cancel</button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
 
-        <h2>Add a student</h2>
-        <form action="/students" method="post">
-            <input type="text" name="name" placeholder="Enter name">
-            <input type="number" name="age" placeholder="Enter age">
-            <input type="text" name="major" placeholder="Enter major">
-            <button type="submit">Add</button>
-        </form>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                            <% } %>
+                </section>
+
+               
+                <section class="card">
+                    <h2>Create new student</h2>
+                    <form class="stack" method="POST" action="/students">
+                        <label>
+                            Name
+                            <input name="name" type="text" placeholder="Full name" required />
+                        </label>
+
+                        <label>
+                            Age
+                            <input name="age" type="number" min="0" placeholder="18" required />
+                        </label>
+
+                        <label>
+                            Major
+                            <input name="major" type="text" placeholder="Computer Science" required />
+                        </label>
+
+                        <div class="form-actions">
+                            <button class="btn primary" type="submit">Create</button>
+                        </div>
+                    </form>
+                </section>
+
+                <footer class="footer">
+                    <small></small>
+                </footer>
     </main>
+
+    <script>
+      
+        document.addEventListener('click', function (e) {
+            if (e.target.matches('[data-edit-id]')) {
+                const id = e.target.getAttribute('data-edit-id');
+                document.getElementById('edit-row-' + id).style.display = 'table-row';
+            }
+            if (e.target.matches('[data-cancel-id]')) {
+                const id = e.target.getAttribute('data-cancel-id');
+                document.getElementById('edit-row-' + id).style.display = 'none';
+            }
+        });
+    </script>
 </body>
 
 </html>

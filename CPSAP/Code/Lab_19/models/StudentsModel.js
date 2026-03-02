@@ -1,79 +1,78 @@
 const fs = require('fs');
-const path = require('path');
+const path= require('path');
 
-class StudentModel{
+class StudentsModel{
     constructor(){
-        this.filePath = path.join(__dirname,'Students.json');
+        this.file_path = path.join(__dirname,'..','StudentsList.json');
         this.students = this.loadStudents();
-        this.idCounter= this.students.length?Math.max(...this.students.map(s=>s.id))+1:1;
+        this.students_counter = this.students.length?Math.max(...this.students.map(s=>s.id))+1:1;
     }
 
-
     loadStudents(){
-        if(fs.existsSync(this.filePath)){
-            try{
-                const data = fs.readFileSync(this.filePath,'utf-8');
-                return JSON.parse(data);
-            }
-            catch(err){
-                console.error("Failed to load data from Students.json. Error: ",err);
-                return [];
-            }
+        try{
+            const raw = fs.readFileSync(this.file_path,'utf8');
+            return JSON.parse(raw);
         }
-        return [];
+        catch(err){
+            console.error("Failed parsing data from StudentsList.json");
+            return [];
+        }
     }
 
     saveStudents(){
         try{
-            fs.writeFileSync(this.filePath,JSON.stringify(this.students,null,2));
+            fs.writeFileSync(this.file_path,JSON.stringify(this.students,null,2))
         }
         catch(err){
-            console.error("Failed to save data to Students.json. Error: ",err);
+            console.error("Failed to save data to StudentsList.json");
         }
     }
 
-    getAll(){
+    getAllStudents(){
         return this.students;
     }
-
-    getById(id){
-        return this.students.find(s=>s.id==Number(id))||null;
+    
+    getStudentById(id){
+        return this.students.find(s=>s.id==id);
     }
 
-    create(data){
+    createStudent(data){
         const newStudent = {
-            id:this.idCounter++,
+            id:this.students_counter++,
             name:data.name,
-            age:data.age||null,
+            age:data.age,
             major:data.major
-        };
-
+        }
+        
         this.students.push(newStudent);
         this.saveStudents();
         return newStudent;
     }
 
-    update(id,data){
-        const studentIndex = this.students.findIndex(s=>s.id==Number(id));
-        if(studentIndex==-1){
+    updateStudent(id,data){
+        const foundIndex = this.students.findIndex(s=>s.id==id);
+        if(foundIndex!=-1){
+            this.students[foundIndex] = {...this.students[foundIndex],...data};
+            this.saveStudents();
+            return this.students[foundIndex];
+        }
+        else{
             return null;
         }
-
-        this.students[studentIndex] = {...this.students[studentIndex],...data};
-        this.saveStudents();
-        return this.students[studentIndex];
     }
 
-    delete(id){
-        const studentIndex = this.students.findIndex(s=>s.id==Number(id));
-        if(studentIndex==-1){
+    removeStudent(id){
+        const foundIndex  =this.students.findIndex(s=>s.id==id);
+        if(foundIndex!=-1){
+            this.students.splice(foundIndex,1);
+            this.saveStudents();
+            return true;
+        }
+        else{
             return false;
         }
-        this.students.splice(studentIndex,1);
-        this.saveStudents();
-        return true;
     }
 }
 
 
-module.exports = new StudentModel();
+module.exports = new StudentsModel();

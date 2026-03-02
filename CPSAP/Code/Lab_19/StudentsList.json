@@ -1,0 +1,20 @@
+[
+  {
+    "id": 2,
+    "name": "Ben Dover",
+    "age": 20,
+    "major": "Data Analysis"
+  },
+  {
+    "id": 3,
+    "name": "Karen Karenson",
+    "age": 20,
+    "major": "Electrical Engineering"
+  },
+  {
+    "id": 5,
+    "name": "John Doe",
+    "age": 20,
+    "major": "Computer Science"
+  }
+]
