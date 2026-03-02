@@ -10,6 +10,11 @@ import (
 const C01 = 3.14
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", http.MethodGet)
+		http.Error(w, "Methods that differ from GET are not allowed", 405)
+		return
+	}
 	fmt.Fprintf(w, "C01 = %v\n", C01)
 	fmt.Fprintf(w, "C02 = %e\n", C02)
 	fmt.Fprintf(w, "C03 = %v\n", go02_01lib.C03)
