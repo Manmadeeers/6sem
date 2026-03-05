@@ -57,8 +57,8 @@ def main():
     print(f"\n1. Интервал [2, {n}]:")
     print(f"   Простые числа: {primes_to_n}")
     print(f"   Количество (факт): {count_n}")
-    print(f"   Значение n/ln(n): {theo_n:.2f}")
-    print(f"   Разница: {abs(count_n - theo_n):.2f}")
+    print(f"   Значение n/ln(n): {math.floor(theo_n)}")
+    print(f"   Разница: {math.floor(abs(count_n - theo_n))}")
 
     # 2. Интервал [m, n]
     primes_m_n = get_primes_in_range(m, n)
@@ -85,10 +85,13 @@ def main():
     # 6. Дополнительно: НОД трех чисел (если нужно для отчета)
     print("\n6. Проверка НОД трех чисел:")
     try:
-        val3 = int(input("   Введите третье число для НОД (или 0 чтобы пропустить): "))
-        if val3 != 0:
-            res_gcd3 = gcd(res_gcd, val3)
-            print(f"   НОД({m}, {n}, {val3}) = {res_gcd3}")
+        val1 = int(input("   Введите первое число для НОД: "))
+        val2 = int(input("   Введите второе число для НОД: "))
+        val3 = int(input("   Введите третье число для НОД: "))
+
+        tmp_res = gcd(val1,val2)
+        final_res = gcd(tmp_res,val3)
+        print(f"   НОД({val1}, {val2}, {val3}) = {final_res}")
     except ValueError:
         pass
 
