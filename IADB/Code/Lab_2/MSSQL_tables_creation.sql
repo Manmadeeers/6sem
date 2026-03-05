@@ -1,7 +1,7 @@
 use Warehouse;
 
 create table Stocks(
-	Stock_ID int primary key,
+	Stock_ID int identity(1,1) primary key,
 	Capacity int not null check(Capacity>0),
 	Filled_part int not null default 0,
 	Description nvarchar(100) not null,
@@ -9,7 +9,7 @@ create table Stocks(
 );
 
 create table Users(
-	User_ID int primary key,
+	User_ID int identity(1,1) primary key,
 	Email varchar(255) not null unique,
 	Role varchar(30) not null,
 	Password_hash varbinary(64) not null unique, --SHA-512 algorithm
@@ -18,7 +18,7 @@ create table Users(
 );
 
 create table Products(
-	Product_ID int primary key,
+	Product_ID int identity(1,1) primary key,
 	Stock_id int not null,
 	Name nvarchar(200) not null,
 	Price decimal(19,4) not null default 0.0000,
@@ -26,10 +26,8 @@ create table Products(
 	constraint FK_Products_Stocks foreign key(Stock_ID) references Stocks(Stock_ID)
 );
 
-
-
 create table Tasks(
-	Task_ID int primary key,
+	Task_ID int identity(1,1) primary key,
 	User_ID int not null,
 	Due_date datetime2 not null,
 	Priority varchar(30) not null check(Priority in ('Low','Moderate','High','Highest')),
@@ -39,15 +37,16 @@ create table Tasks(
 );
 
 create table Orders(
-	Order_ID int primary key,
+	Order_ID int identity(1,1) primary key,
 	Order_date datetime2 not null default GETDATE(),
 	Order_status varchar(50) not null  default 'Created',
 	Total_amount decimal(19,4) default 0.0000,
 	constraint CK_Order_Status check(Order_status in ('Created','In work','Shipped','Canceled'))
 );
 
+
 create table Order_items(
-	Item_ID int primary key,
+	Item_ID int identity(1,1) primary key,
 	Order_ID int not null,
 	Product_ID int not null,
 	Quantity int not null default 1 check(Quantity>0),
@@ -56,7 +55,7 @@ create table Order_items(
 );
 
 create table Pack(
-	Pack_ID int primary key,
+	Pack_ID int identity(1,1) primary key,
 	User_ID int not null,
 	Order_ID int not null,
 	Pack_date datetime2 not null default GETDATE(),
@@ -67,7 +66,7 @@ create table Pack(
 
 
 create table Pack_items(
-	Item_ID int primary key,
+	Item_ID int identity(1,1) primary key,
 	Pack_ID int not null ,
 	Product_ID int not null,
 	Quantity int not null default 1 check(Quantity>0) ,
@@ -75,4 +74,3 @@ create table Pack_items(
 	constraint FK_PackItems_Pack foreign key(Pack_ID) references Pack(Pack_ID),
 	constraint FK_PackItems_Products foreign key(Product_ID) references Products(Product_ID)
 );
-
