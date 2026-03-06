@@ -23,3 +23,22 @@ begin
 	return @Status
 end;
 go
+
+
+create function fn_CanFulfillOrder(@OrderID int)
+returns bit
+as
+begin
+ declare @can bit = 1;
+
+ if exists(
+	select 1
+	from Order_items oi
+	join Products p on p.Product_ID = oi.Product_ID
+	where oi.Order_ID = @OrderID
+	and oi.Quantity>P.Quantity
+ )
+ set @can = 0;
+
+ return @can;
+end;
