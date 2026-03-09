@@ -1,0 +1,146 @@
+:root {
+    --bg: #ffffff;
+    --card: #f8fbff;
+    --text: #0f1724;
+    --muted: #6b7280;
+    --accent: #1e90ff;
+    --accent-600: #156fe6;
+    --radius: 12px;
+    --shadow: 0 10px 30px rgba(30, 144, 255, 0.08);
+    --max-width: 520px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fullscreen centered layout */
+.logout-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+}
+
+/* Card container */
+.logout-card {
+    width: 100%;
+    max-width: var(--max-width);
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 36px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(16, 24, 40, 0.04);
+    text-align: center;
+    /* center inline content */
+}
+
+/* Optional small status badge above heading */
+.logout-badge {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(30, 144, 255, 0.08);
+    color: var(--accent-600);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Heading */
+.logout-card h1 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* Message */
+.logout-card p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 22px;
+}
+
+/* Button-like link (primary action) */
+.logout-card .btn {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-600));
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(30, 144, 255, 0.16);
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+/* Secondary plain link style (if needed) */
+.logout-card .link-plain {
+    display: inline-block;
+    margin-left: 12px;
+    color: var(--accent-600);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(30, 144, 255, 0.06);
+}
+
+/* Hover/focus */
+.logout-card .btn:hover {
+    transform: translateY(-3px);
+}
+
+.logout-card .btn:active {
+    transform: translateY(0);
+    opacity: 0.98;
+}
+
+.logout-card a:focus {
+    outline: 3px solid rgba(30, 144, 255, 0.06);
+    outline-offset: 4px;
+}
+
+/* Small meta text under button (optional) */
+.logout-card .meta {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 420px) {
+    .logout-card {
+        padding: 22px;
+        border-radius: 10px;
+    }
+
+    .logout-card h1 {
+        font-size: 20px;
+    }
+
+    .logout-card .btn {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .logout-card .link-plain {
+        display: block;
+        margin: 10px auto 0;
+    }
+}
