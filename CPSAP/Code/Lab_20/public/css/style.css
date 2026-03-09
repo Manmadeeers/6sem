@@ -1,0 +1,184 @@
+/* Minimalistic color update — preserves original element structure and layout */
+:root{
+  --bg: #fafafa;
+  --card: #ffffff;
+  --muted: #7a8590;
+  --text: #0f1720;
+  --primary: #0b5fff;   /* subtle blue for actions */
+  --accent: #1f7a5b;    /* green for success */
+  --danger: #c43e3e;    /* red for delete */
+  --outline: #e9eef6;
+  --shadow: rgba(16, 24, 40, 0.04);
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 16px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Header */
+header h1 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
+/* Main container card */
+.container {
+  background: var(--card);
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px var(--shadow);
+}
+
+/* Contacts list rows (vertical stack) */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Contact button appearance (keeps original structure) */
+.row-button {
+  display: block;
+  padding: 8px 10px;
+  text-decoration: none;
+  border: 1px solid var(--outline);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  color: var(--text);
+  transition: background .12s ease, transform .06s ease;
+}
+.row-button:hover {
+  background: #f3f7ff;
+  transform: translateY(-2px);
+}
+
+/* Disabled / inactive look */
+.row-button.disabled {
+  pointer-events: none;
+  opacity: 0.55;
+  cursor: default;
+  filter: grayscale(8%);
+}
+
+/* Controls area */
+.controls {
+  margin-bottom: 12px;
+}
+
+/* Primary / neutral control buttons */
+.add-btn, .back-btn, .cancel-btn {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Primary add button — subtle blue */
+.add-btn {
+  background: linear-gradient(180deg, var(--primary), #0956d6);
+  box-shadow: 0 6px 18px rgba(11,95,255,0.08);
+}
+
+/* Back button — soft outline */
+.back-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--outline);
+}
+
+/* Cancel — muted */
+.cancel-btn {
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid #f0f3f6;
+  margin-left: 8px;
+}
+
+/* Edit form layout */
+.edit-form label {
+  display: block;
+  margin: 8px 0;
+  color: var(--muted);
+}
+.edit-form input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--outline);
+  background: #fff;
+  color: var(--text);
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+.edit-form input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 6px 18px rgba(11,95,255,0.06);
+}
+
+/* Form buttons row */
+.form-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Update / Delete / Discard button styles */
+button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Update: use primary blue */
+.btn-update {
+  background: linear-gradient(180deg, var(--primary), #0956d6);
+}
+
+/* Delete: red variant */
+.btn-delete {
+  background: linear-gradient(180deg, #d65b5b, var(--danger));
+}
+
+/* Discard: muted outlined */
+.btn-discard {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid #eef6fc;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Inline delete variant */
+.inline-delete {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+/* Small responsive tweak */
+@media (max-width: 520px) {
+  .container { padding: 12px; }
+  .row-button { padding: 10px; }
+  .form-buttons { flex-direction: column; align-items: stretch; }
+  .add-btn, .back-btn, .cancel-btn { width: 100%; text-align: center; }
+}

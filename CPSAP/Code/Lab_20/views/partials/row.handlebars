@@ -1,0 +1,9 @@
+{{#if blocked}}
+  <a class="row-button disabled" tabindex="-1" aria-disabled="true">
+    {{contact.name}} — {{contact.phone}}
+  </a>
+{{else}}
+  <a class="row-button" href="/Update?id={{contact.id}}">
+    {{contact.name}} — {{contact.phone}}
+  </a>
+{{/if}}

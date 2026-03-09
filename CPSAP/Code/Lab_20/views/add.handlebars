@@ -1,0 +1,29 @@
+<section class="container">
+  <div class="controls top-controls">
+    <a class="back-btn" href="/">Вернуться</a>
+  </div>
+
+  <h2>Добавление контакта</h2>
+
+  <div class="rows">
+    {{#each contacts}}
+      {{> row contact=this blocked=true}}
+    {{/each}}
+  </div>
+
+  <form method="POST" action="/Add" class="edit-form">
+    <label>
+      Имя:
+      <input name="name" type="text" required />
+    </label>
+    <label>
+      Телефон:
+      <input name="phone" type="text" required />
+    </label>
+    <div class="form-buttons">
+      <button type="submit">Добавить</button>
+      
+    </div>
+  </form>
+  {{{cancelButton}}}
+</section>

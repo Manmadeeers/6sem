@@ -1,0 +1,36 @@
+<section class="container">
+  <div class="controls top-controls">
+    <a class="back-btn" href="/">Вернуться</a>
+  </div>
+
+  <h2>Изменение контакта</h2>
+
+  <div class="rows">
+    {{#each contacts}}
+      {{> row contact=this blocked=true}}
+    {{/each}}
+  </div>
+
+  <form method="POST" action="/Update" class="edit-form" id="updateForm">
+    <input type="hidden" name="id" value="{{contact.id}}" />
+    <label>
+      Имя:
+      <input id="editInput" name="name" type="text" value="{{contact.name}}" />
+    </label>
+    <label>
+      Телефон:
+      <input name="phone" type="text" value="{{contact.phone}}" />
+    </label>
+    <div class="form-buttons">
+      <button type="submit" id="changeBtn">Изменить</button>
+    </div>
+  </form>
+  <form method="POST" action="/Delete" class="inline-delete" id="deleteForm">
+        <input type="hidden" name="id" value="{{contact.id}}" />
+        <button type="submit" id="deleteBtn">Удалить</button>
+      </form>
+      
+      
+
+      {{{cancelButton}}}
+</section>

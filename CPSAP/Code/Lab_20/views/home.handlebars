@@ -1,0 +1,16 @@
+<section class="container">
+  <div class="controls">
+    <a class="add-btn" href="/Add">Добавить</a>
+  </div>
+
+  <h2>Список контактов</h2>
+  {{#if contacts}}
+    <div class="rows">
+      {{#each contacts}}
+        {{> row contact=this blocked=false}}
+      {{/each}}
+    </div>
+  {{else}}
+    <p>Пусто</p>
+  {{/if}}
+</section>
