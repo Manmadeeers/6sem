@@ -3,49 +3,47 @@ use Warehouse;
 go
 
 --to check the percentage of filled part of a specific stock
-create function fn_GetStockStatus(@StockID int)
-returns nvarchar(20)
-as 
-begin
-	declare @Status nvarchar(20);
-	declare @Percent float;
+CREATE OR ALTER FUNCTION dbo.fn_GetStockStatus(@StockID int)
+RETURNS nvarchar(20)
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM dbo.Stocks WHERE Stock_ID = @StockID)
+        RETURN N'NOT_FOUND';
+    DECLARE @Percent float;
+    SELECT @Percent = (CAST(Filled_part AS float) / CAST(Capacity AS float)) * 100.0
+    FROM dbo.Stocks
+    WHERE Stock_ID = @StockID;
+    DECLARE @Status nvarchar(20);
+    SET @Status = CASE
+        WHEN @Percent <= 20.0 THEN N'LOW'
+        WHEN @Percent >= 95.0 THEN N'FULL'
+        ELSE N'OK'
+    END;
+    RETURN @Status;
+END;
+GO
 
-	select @Percent  = (CAST(Filled_part as float)/CAST(Capacity as float))*100
-	from Stocks
-	where Stock_ID = @StockID;
 
-	set @Status = CASE
-		WHEN @Percent<=20 THEN 'LOW'
-		WHEN @Percent>=95 THEN 'FULL'
-		ELSE 'OK'
-	end;
-
-	return @Status
-end;
+CREATE OR ALTER FUNCTION dbo.fn_CanFulfillOrder(@OrderID int)
+RETURNS bit
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM dbo.Orders WHERE Order_ID = @OrderID)
+        RETURN 0;
+    DECLARE @can bit = 1;
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Order_items oi
+        JOIN dbo.Products p ON p.Product_ID = oi.Product_ID
+        WHERE oi.Order_ID = @OrderID
+          AND oi.Quantity > p.Quantity
+    )
+        SET @can = 0;
+    RETURN @can;
+END;
 go
 
-
-create function fn_CanFulfillOrder(@OrderID int)
-returns bit
-as
-begin
- declare @can bit = 1;
-
- if exists(
-	select 1
-	from Order_items oi
-	join Products p on p.Product_ID = oi.Product_ID
-	where oi.Order_ID = @OrderID
-	and oi.Quantity>P.Quantity
- )
- set @can = 0;
-
- return @can;
-end;
-
-go
-
-create function fn_CalculateOrderTotal (@OrderID int)
+create or alter function fn_CalculateOrderTotal (@OrderID int)
 returns decimal (19,4)
 as
 begin
@@ -61,44 +59,73 @@ end;
 
 go
 
-create procedure sp_DispatchProduct
-	@ProductID int,
-	@QuantityToDispatch int
-as
-begin
-	set nocount on;
-	begin transaction;
+CREATE OR ALTER PROCEDURE dbo.sp_DispatchProduct
+    @ProductID int,
+    @QuantityToDispatch int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-	begin try
-		if(select Quantity from Products where Product_ID=@ProductID) < @QuantityToDispatch
-		begin
-			raiserror('Insufficient stock to fulfill dispatch.', 16,1);
-			rollback transaction;
-			return;
-		end;
+    BEGIN TRY
+        -- Validate product exists and fetch current quantities
+        DECLARE @CurrentProductQty int;
+        SELECT @CurrentProductQty = Quantity
+        FROM dbo.Products
+        WHERE Product_ID = @ProductID;
 
-		update Products
-		set Quantity = Quantity-@QuantityToDispatch
-		where Product_ID=@ProductID;
+        IF @CurrentProductQty IS NULL
+        BEGIN
+            RAISERROR('Product not found for Product_ID = %d', 16, 1, @ProductID);
+            RETURN;
+        END
 
-		update S
-		set Filled_part = Filled_part - @QuantityToDispatch
-		from Stocks S
-		join Products P on S.Stock_ID = P.Stock_id
-		where P.Product_ID=@ProductID;
+        -- Validate stock status for this product
+        DECLARE @CurrentStockFilled int;
+        SELECT @CurrentStockFilled = S.Filled_part
+        FROM dbo.Stocks S
+        JOIN dbo.Products P ON S.Stock_ID = P.Stock_id
+        WHERE P.Product_ID = @ProductID;
 
-		commit transaction;
-	end try
-	begin catch
-		rollback transaction;
-		throw;
-	end catch
-end;
-go 
+        IF @CurrentStockFilled IS NULL
+        BEGIN
+            RAISERROR('Stock not found for Product_ID = %d', 16, 1, @ProductID);
+            RETURN;
+        END
+
+        -- Guard against underflow
+        IF @CurrentProductQty < @QuantityToDispatch
+            RAISERROR('Insufficient product quantity', 16, 1);
+
+        IF @CurrentStockFilled < @QuantityToDispatch
+            RAISERROR('Insufficient stock filled in warehouse', 16, 1);
+
+        -- Perform dispatch atomically
+        BEGIN TRANSACTION;
+
+            UPDATE dbo.Products
+            SET Quantity = Quantity - @QuantityToDispatch
+            WHERE Product_ID = @ProductID;
+
+            UPDATE dbo.Stocks
+            SET Filled_part = Filled_part - @QuantityToDispatch
+            FROM dbo.Stocks S
+            JOIN dbo.Products P ON S.Stock_ID = P.Stock_id
+            WHERE P.Product_ID = @ProductID;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
 
 go
 
-create function dbo.fn_GetUserTaskSummary (@UserID int)
+create or alter function dbo.fn_GetUserTaskSummary (@UserID int)
 returns table
 as 
 return(
