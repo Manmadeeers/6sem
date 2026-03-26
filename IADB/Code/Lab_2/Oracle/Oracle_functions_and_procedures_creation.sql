@@ -1,64 +1,198 @@
-CREATE OR REPLACE FUNCTION fn_GetStockStatus(p_StockID IN NUMBER) RETURN NVARCHAR2 IS
-v_Status NVARCHAR2(20); v_Percent NUMBER;
-BEGIN
-SELECT (Filled_part/Capacity)*100 INTO v_Percent FROM Stocks WHERE Stock_ID = p_StockID;
-v_Status := CASE WHEN v_Percent <= 20 THEN 'LOW' WHEN v_Percent >= 95 THEN 'FULL' ELSE 'OK' END;
-RETURN v_Status;
-END;
-/
-CREATE OR REPLACE FUNCTION fn_CanFulfillOrder(p_OrderID IN NUMBER) RETURN NUMBER IS
-v_count NUMBER;
-BEGIN
-SELECT COUNT(*) INTO v_count FROM Order_items oi JOIN Products p ON p.Product_ID = oi.Product_ID WHERE oi.Order_ID = p_OrderID AND oi.Quantity > p.Quantity;
-IF v_count > 0 THEN RETURN 0; ELSE RETURN 1; END IF;
-END;
-/
-CREATE OR REPLACE FUNCTION fn_CalculateOrderTotal(p_OrderID IN NUMBER) RETURN NUMBER IS
-v_Total NUMBER(19,4);
-BEGIN
-SELECT SUM(pi.Quantity*pi.Unit_price) INTO v_Total FROM Pack_items pi JOIN Pack p ON pi.Pack_ID = p.Pack_ID WHERE p.Order_ID = p_OrderID;
-RETURN NVL(v_Total, 0.0000);
-END;
-/
-CREATE OR REPLACE PROCEDURE sp_DispatchProduct(p_ProductID IN NUMBER, p_QuantityToDispatch IN NUMBER) AS
-v_CurrQty NUMBER;
-BEGIN
-SELECT Quantity INTO v_CurrQty FROM Products WHERE Product_ID = p_ProductID FOR UPDATE;
-IF v_CurrQty < p_QuantityToDispatch THEN raise_application_error(-20001, 'Insufficient stock to fulfill dispatch.'); END IF;
-UPDATE Products SET Quantity = Quantity - p_QuantityToDispatch WHERE Product_ID = p_ProductID;
-UPDATE Stocks SET Filled_part = Filled_part - p_QuantityToDispatch WHERE Stock_ID = (SELECT Stock_id FROM Products WHERE Product_ID = p_ProductID);
-COMMIT;
-EXCEPTION WHEN OTHERS THEN ROLLBACK; RAISE;
-END;
-/
-CREATE OR REPLACE FUNCTION fn_GetUserTaskSummary(p_UserID IN NUMBER) RETURN SYS_REFCURSOR IS
-v_rc SYS_REFCURSOR;
-BEGIN
-OPEN v_rc FOR SELECT U.Email, U.User_Role, (SELECT COUNT(*) FROM Tasks WHERE User_ID = p_UserID AND Is_completed = 1) AS Completed_tasks, (SELECT COUNT(*) FROM Tasks WHERE User_ID = p_UserID AND Is_completed = 0 AND Priority = 'Highest') AS Urgent_Pending FROM Users U WHERE U.User_ID = p_UserID;
-RETURN v_rc;
-END;
-/
-CREATE OR REPLACE PROCEDURE sp_AdjustStockCapacity(p_StockID IN NUMBER, p_NewCapacity IN NUMBER) AS
-v_Filled NUMBER;
-BEGIN
-SELECT Filled_part INTO v_Filled FROM Stocks WHERE Stock_ID = p_StockID;
-IF p_NewCapacity < v_Filled THEN DBMS_OUTPUT.PUT_LINE('Error: New capacity cannot be less than the currently filled volume'); ELSE UPDATE Stocks SET Capacity = p_NewCapacity WHERE Stock_ID = p_StockID; DBMS_OUTPUT.PUT_LINE('Stock capacity updated successfully'); END IF;
-END;
-/
-CREATE OR REPLACE FUNCTION fn_GetMonthlyProductFinancials(p_Month IN NUMBER, p_Year IN NUMBER) RETURN SYS_REFCURSOR IS
-v_rc SYS_REFCURSOR;
-BEGIN
-OPEN v_rc FOR SELECT P.Product_ID, P.Name AS Product_Name, SUM(PI.Quantity) AS Total_Units_Sold, SUM(PI.Quantity * PI.Unit_price) AS Total_Revenue, AVG(PI.Unit_price) AS Avg_Selling_Price, COUNT(DISTINCT PK.Order_ID) AS Total_Orders_Fulfilled FROM Products P JOIN Pack_items PI ON P.Product_ID = PI.Product_ID JOIN Pack PK ON PI.Pack_ID = PK.Pack_ID WHERE EXTRACT(MONTH FROM PK.Pack_date) = p_Month AND EXTRACT(YEAR FROM PK.Pack_date) = p_Year AND PK.Pack_status = 'Shipped' GROUP BY P.Product_ID, P.Name;
-RETURN v_rc;
-END;
-/
-CREATE OR REPLACE PROCEDURE usp_GenWarehouseFinReport AS
-v_Realized NUMBER(19,4); v_Pending NUMBER(19,4); v_Inventory NUMBER(19,4);
-BEGIN
-DBMS_OUTPUT.PUT_LINE('--- WAREHOUSE FINANCIAL SUMMARY REPORT ---'); DBMS_OUTPUT.PUT_LINE('Generated on: ' || TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS'));
-SELECT NVL(SUM(Quantity * Unit_price), 0) INTO v_Realized FROM Pack_items pi JOIN Pack p ON pi.Pack_ID = p.Pack_ID WHERE p.Pack_status = 'Shipped';
-SELECT NVL(SUM(Total_amount), 0) INTO v_Pending FROM Orders WHERE Order_status IN ('Created', 'In work');
-SELECT NVL(SUM(Quantity * Price), 0) INTO v_Inventory FROM Products;
-DBMS_OUTPUT.PUT_LINE('Realized Revenue: ' || v_Realized); DBMS_OUTPUT.PUT_LINE('Pending Pipeline: ' || v_Pending); DBMS_OUTPUT.PUT_LINE('Inventory Value: ' || v_Inventory); DBMS_OUTPUT.PUT_LINE('Total Projected: ' || (v_Realized + v_Pending));
-END;
-/
+create or replace function fn_getstockstatus(p_stockid in number) return nvarchar2 is
+    v_status nvarchar2(20);
+    v_percent number;
+begin
+    select (filled_part / capacity) * 100 into v_percent
+    from stocks where stock_id = p_stockid;
+    v_status := case
+        when v_percent <= 20 then 'LOW'
+        when v_percent >= 95 then 'FULL'
+        else 'OK'
+    end;
+    return v_status;
+end;
+
+create or replace function fn_canfulfillorder(p_orderid in number) return number is
+    v_count number;
+begin
+    select count(*) into v_count
+    from order_items oi
+    join products p on p.product_id = oi.product_id
+    where oi.order_id = p_orderid and oi.quantity > p.quantity;
+    if v_count > 0 then return 0; else return 1; end if;
+end;
+
+
+create or replace procedure sp_dispatchproduct(p_productid in number, p_quantitytodispatch in number) as
+    v_currqty number;
+begin
+    select quantity into v_currqty
+    from products where product_id = p_productid for update;
+    if v_currqty < p_quantitytodispatch then
+        raise_application_error(-20001, 'insufficient stock to fulfill dispatch.');
+    end if;
+    update products set quantity = quantity - p_quantitytodispatch
+    where product_id = p_productid;
+    update stocks set filled_part = filled_part - p_quantitytodispatch
+    where stock_id = (select stock_id from products where product_id = p_productid);
+    commit;
+exception
+    when others then rollback; raise;
+end;
+
+
+
+create or replace function fn_getmonthlyproductfinancials(p_month in number, p_year in number) return sys_refcursor is
+    v_rc sys_refcursor;
+begin
+    open v_rc for
+        select p.product_id,
+               p.name as product_name,
+               sum(pi.quantity) as total_units_sold,
+               sum(pi.quantity * pi.unit_price) as total_revenue,
+               avg(pi.unit_price) as avg_selling_price,
+               count(distinct pk.order_id) as total_orders_fulfilled
+        from products p
+        join pack_items pi on p.product_id = pi.product_id
+        join pack pk on pi.pack_id = pk.pack_id
+        where extract(month from pk.pack_date) = p_month
+          and extract(year from pk.pack_date) = p_year
+          and pk.pack_status = 'Shipped'
+        group by p.product_id, p.name;
+    return v_rc;
+end;
+
+
+create or replace procedure usp_genwarehousefinreport as
+    v_realized number(19,4);
+    v_pending number(19,4);
+    v_inventory number(19,4);
+begin
+    dbms_output.put_line('--- warehouse financial summary report ---');
+    dbms_output.put_line('generated on: ' || to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss'));
+
+    select nvl(sum(quantity * unit_price), 0) into v_realized
+    from pack_items pi join pack p on pi.pack_id = p.pack_id
+    where p.pack_status = 'Shipped';
+
+    select nvl(sum(total_amount), 0) into v_pending
+    from orders where order_status in ('Created', 'In work');
+
+    select nvl(sum(quantity * price), 0) into v_inventory
+    from products;
+
+    dbms_output.put_line('realized revenue: ' || v_realized);
+    dbms_output.put_line('pending pipeline: ' || v_pending);
+    dbms_output.put_line('inventory value: ' || v_inventory);
+    dbms_output.put_line('total projected: ' || (v_realized + v_pending));
+end;
+
+
+create or replace function fn_getorderpackprogress(p_orderid in number) return number is
+    v_total number;
+    v_packed number;
+begin
+    select nvl(sum(oi.quantity), 0) into v_total
+    from order_items oi
+    where oi.order_id = p_orderid;
+    if v_total = 0 then return 0; end if;
+    select nvl(sum(pi.quantity), 0) into v_packed
+    from pack_items pi
+    join pack p on pi.pack_id = p.pack_id
+    where p.order_id = p_orderid
+      and p.pack_status in ('Packed', 'Shipped');
+    return round((v_packed * 100.0) / v_total, 2);
+end;
+
+
+create or replace function fn_getstockturnoverrate(p_stockid in number, p_days in number) return number is
+    v_shipped number;
+    v_currentstock number;
+begin
+    select nvl(sum(pi.quantity), 0) into v_shipped
+    from pack_items pi
+    join pack p on pi.pack_id = p.pack_id
+    join products pr on pi.product_id = pr.product_id
+    where pr.stock_id = p_stockid
+      and p.pack_status = 'Shipped'
+      and p.pack_date >= sysdate - p_days;
+    select nvl(sum(quantity), 0) into v_currentstock
+    from products
+    where stock_id = p_stockid;
+    if v_currentstock = 0 then return 0; end if;
+    return round(v_shipped / v_currentstock, 4);
+end;
+
+
+create or replace procedure sp_escalateoverduetasks as
+    v_count number;
+begin
+    update tasks
+    set priority = case
+        when priority = 'Low' then 'Moderate'
+        when priority = 'Moderate' then 'High'
+        when priority = 'High' then 'Highest'
+        else priority
+    end
+    where is_completed = 0
+      and due_date < sysdate
+      and priority <> 'Highest';
+    v_count := sql%rowcount;
+    dbms_output.put_line('escalated ' || v_count || ' overdue tasks');
+    commit;
+end;
+
+
+create or replace procedure sp_cancelstaleorders(p_staledays in number) as
+    v_count number;
+begin
+    update orders
+    set order_status = 'Canceled'
+    where order_status = 'Created'
+      and order_date < sysdate - p_staledays;
+    v_count := sql%rowcount;
+    dbms_output.put_line('canceled ' || v_count || ' stale orders older than ' || p_staledays || ' days');
+    commit;
+end;
+
+
+create or replace procedure sp_transferproduct(p_productid in number, p_targetstockid in number, p_qty in number) as
+    v_sourcestockid number;
+    v_currentqty number;
+    v_targetcapacity number;
+    v_targetfilled number;
+begin
+    select stock_id, quantity into v_sourcestockid, v_currentqty
+    from products
+    where product_id = p_productid;
+
+    if v_sourcestockid = p_targetstockid then
+        raise_application_error(-20002, 'source and target stock are the same');
+    end if;
+
+    if v_currentqty < p_qty then
+        raise_application_error(-20003, 'insufficient product quantity for transfer');
+    end if;
+
+    select capacity, filled_part into v_targetcapacity, v_targetfilled
+    from stocks
+    where stock_id = p_targetstockid;
+
+    if (v_targetfilled + p_qty) > v_targetcapacity then
+        raise_application_error(-20004, 'target stock does not have enough free capacity');
+    end if;
+
+    update stocks set filled_part = filled_part - p_qty
+    where stock_id = v_sourcestockid;
+
+    update stocks set filled_part = filled_part + p_qty
+    where stock_id = p_targetstockid;
+
+    update products set stock_id = p_targetstockid
+    where product_id = p_productid;
+
+    commit;
+exception
+    when others then rollback; raise;
+end;
+

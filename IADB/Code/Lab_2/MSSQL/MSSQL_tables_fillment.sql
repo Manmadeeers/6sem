@@ -63,6 +63,8 @@ INSERT INTO Tasks (User_ID, Due_date, Priority, Description, Is_completed) VALUE
 
 GO
 
+INSERT INTO Tasks (User_ID, Due_date, Priority, Description, Is_completed) VALUES 
+(3, DATEADD(day, -2, GETDATE()), 'Low', N'Task to show priority change', 0);
 
 INSERT INTO Orders (Order_date, Order_status, Total_amount) VALUES 
 

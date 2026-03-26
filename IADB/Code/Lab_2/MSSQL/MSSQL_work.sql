@@ -1,54 +1,72 @@
-use Warehouse;
+use warehouse;
 
 go
 
--- 1) fn_GetStockStatus
+select dbo.fn_getstockstatus(1) as stock_status;
+select dbo.fn_getstockstatus(2) as stock_status;
+select dbo.fn_getstockstatus(999) as stock_status;
 
-select dbo.fn_GetStockStatus(1) as StockStatus       -- returns 'OK', 'LOW', or 'FULL'
-select dbo.fn_GetStockStatus(999) as StockStatus	--non existent stock
+go
 
+select dbo.fn_canfulfillorder(1) as can_fulfill;
+select dbo.fn_canfulfillorder(2) as can_fulfill;
+select dbo.fn_canfulfillorder(999) as can_fulfill;
 
--- 2) fn_CanFulfillOrder
+go
 
-SELECT dbo.fn_CanFulfillOrder(1) AS CanFulfill;          -- 1 = true, 0 = false
+select * from products where product_id = 1;
+select stock_id, capacity, filled_part from stocks where stock_id = 1;
 
-SELECT dbo.fn_CanFulfillOrder(999) AS CanFulfill;        -- non existent order
+exec dbo.sp_dispatchproduct @productid = 1, @quantitytodispatch = 2;
 
+select * from products where product_id = 1;
+select stock_id, capacity, filled_part from stocks where stock_id = 1;
+select * from stocks where Stock_ID=2;
 
--- 3) fn_CalculateOrderTotal
+go
 
-SELECT dbo.fn_CalculateOrderTotal(1) AS OrderTotal;  -- total for Order_ID = 1
+select * from dbo.fn_getmonthlyproductfinancials(3, 2026);
+select * from dbo.fn_getmonthlyproductfinancials(1, 2026);
+select * from dbo.fn_getmonthlyproductfinancials(13, 2026);
 
-SELECT dbo.fn_CalculateOrderTotal(999) AS OrderTotal; --non existent order
+go
 
+exec dbo.usp_generatewarehousefinancialreport;
 
+go
 
+select dbo.fn_getorderpackprogress(1) as pack_progress;
+select dbo.fn_getorderpackprogress(2) as pack_progress;
+select dbo.fn_getorderpackprogress(999) as pack_progress;
 
--- 4) sp_DispatchProduct
-EXEC dbo.sp_DispatchProduct @ProductID = 1, @QuantityToDispatch = 2;
+go
 
-select * from Products where Product_ID=1;
-SELECT Stock_ID, Capacity, Filled_part FROM dbo.Stocks WHERE Stock_ID = 1;
+select dbo.fn_getstockturnoverrate(1, 30) as turnover_30d;
+select dbo.fn_getstockturnoverrate(1, 90) as turnover_90d;
+select dbo.fn_getstockturnoverrate(999, 30) as turnover_30d;
 
+go
 
--- 5) fn_GetUserTaskSummary (TVF)
+select task_id, priority, due_date, is_completed from tasks where is_completed = 0;
 
-SELECT * FROM dbo.fn_GetUserTaskSummary(2);
-SELECT * FROM dbo.fn_GetUserTaskSummary(100);
+exec dbo.sp_escalateoverduetasks;
 
-select * from Products where Stock_id=1;
+select task_id, priority, due_date, is_completed from tasks where is_completed = 0;
 
+go
 
--- 6) sp_AdjustStockCapacity
+select order_id, order_status, order_date from orders where order_status = 'Created';
 
-EXEC dbo.sp_AdjustStockCapacity @StockID = 1, @NewCapacity = 6001;
-select * from Stocks where Stock_ID=1;
+exec dbo.sp_cancelstaleorders @staledays = 30;
 
+select order_id, order_status, order_date from orders where order_status in ('Created', 'Canceled');
 
--- 7) dbo.fn_GetMonthlyProductFinancials
-SELECT * FROM dbo.fn_GetMonthlyProductFinancials(3,2026);
-SELECT * FROM dbo.fn_GetMonthlyProductFinancials(13,2026);
+go
 
+select product_id, stock_id, quantity from products where product_id = 1;
+select stock_id, capacity, filled_part from stocks where stock_id in (1, 2);
 
--- 8) dbo.usp_GenerateWarehouseFinancialReport
-EXEC dbo.usp_GenerateWarehouseFinancialReport; 
+exec dbo.sp_transferproduct @productid = 1, @targetstockid = 2, @qty = 5;
+
+select product_id, stock_id, quantity from products where product_id = 1;
+select stock_id, capacity, filled_part from stocks where stock_id in (1, 2);
