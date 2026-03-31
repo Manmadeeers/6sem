@@ -1,89 +1,80 @@
-const crypto = require('crypto');
 const express = require('express');
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
-const PORT = 3000;
-const sessionStorage = new Map();
 
-const dh = crypto.createDiffieHellman(2048);
-const prime = dh.getPrime('hex');
-const generator = dh.getGenerator('hex');
+const sessions = new Map();
+
+const dhParams = crypto.createDiffieHellman(2048);
+const p = dhParams.getPrime('hex');
+const g = dhParams.getGenerator('hex');
 
 const app = express();
+app.use(express.json({ limit: '1mb' }));
 
-app.use(express.json());
+app.get('/start', (req, res) => {
+  const serverDH = crypto.createDiffieHellman(Buffer.from(p, 'hex'), Buffer.from(g, 'hex'));
+  serverDH.generateKeys();
+  const A_hex = serverDH.getPublicKey('hex');
+  const sessionId = uuidv4();
 
-app.get('/exchange', (req, res) => {
-    const serverDH = crypto.createDiffieHellman(prime, generator);
-    serverDH.generateKeys();
-    const serverPublicKey = serverDH.getPublicKey('hex');
+  sessions.set(sessionId, { serverDH, step: 1, created: Date.now() });
 
-    const sessionID = uuidv4();
-
-    sessionStorage.set(sessionID,{serverDH,step:1, created:Date.now()});
-    const payload = { prime: prime, generator: generator, serverPublicKey: serverPublicKey, sessionID: sessionID };
-    res.json(payload);
-
-});
-
-app.post('/exchange',(req,res)=>{
-    const {sessionID, clientPublicKey} = req.body;
-    if(!sessionID||!clientPublicKey){
-        return res.status(409).json({error:"Protocol violation"});
-    }
-    const session = sessionStorage.get(sessionID);
-    if(!session||session.step!=1){
-        return res.status(409).json({error:"Unable to find a corresponding session. Protocol violation"});
-    }
-
-    try{
-        const {serverDH} = session;
-        
-        if(typeof clientPublicKey!='string'||!clientPublicKey.match(/^[0-9a-fA-F]+$/)){
-            return res.status(409).json({error:"Invalid clientPublicKey format. Protocol violation"});
-        }
-
-        const clientPublicKey = clientPublicKey;
-        
-        const sharedSecret = serverDH.computeSecret(clientPublicKey);
-        const key = crypto.createHash('sha256').update(sharedSecret).digest();
-
-        session.sharedKey = key;
-        session.step = 2;
-        res.json({ok:true});
-
-    }
-    catch(err){
-        console.error("Diffie-Hellman exchange finish error: ",err);
-        return res.status(409).json({error:"Protocol violations duting key compilation"});
-    }
-
+  res.json({ p, g, A: A_hex, sessionId });
 });
 
 
-app.get('/resource',(req,res)=>{
-    const sessionID = req.params.sessionID;
-    if(!sessionID){
-        return res.status(409).json({error:"Unable to find a session id. Protocol violation"});
+app.post('/finish-dh', (req, res) => {
+  const { sessionId, B } = req.body || {};
+  if (!sessionId || !B) {
+    return res.status(409).json({ error: 'Missing sessionId or B — protocol violation' });
+  }
+  const session = sessions.get(sessionId);
+  if (!session || session.step !== 1) {
+    return res.status(409).json({ error: 'Invalid or expired session — protocol violation' });
+  }
+
+  try {
+    const { serverDH } = session;
+
+    if (typeof B !== 'string' || !B.match(/^[0-9a-fA-F]+$/)) {
+      return res.status(409).json({ error: 'Invalid B format' });
     }
 
-    const session = sessionStorage.get(sessionID);
-    if(!session||!session.step==2||!session.sharedKey){
-        return res.status(409).json({error:"Unable to find a session or session parameters. Protocol violation"});
-    }
+    const clientPub = Buffer.from(B, 'hex');
+   
+    const sharedSecret = serverDH.computeSecret(clientPub);
+    const key = crypto.createHash('sha256').update(sharedSecret).digest(); // 32 bytes
 
-    const key = session.sharedKey;
+    session.sharedKey = key;
+    session.step = 2;
 
-    const studentName = "Филипюк Илья Андреевич";
-    const plain = '\n';
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('finish-dh error', e);
+    return res.status(409).json({ error: 'Protocol error during key computation' });
+  }
+});
 
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-ccm',key,iv);
-    const encrypted = Buffer.concat([cipher.update(Buffer.from(plain, 'utf8')), cipher.final()]);
+app.get('/resource', (req, res) => {
+  const sessionId = req.query.sessionId;
+  if (!sessionId) return res.status(409).json({ error: 'Missing sessionId' });
+  const session = sessions.get(sessionId);
+  if (!session || session.step !== 2 || !session.sharedKey) {
+    return res.status(409).json({ error: 'DH not completed or invalid session' });
+  }
 
-    res.json({iv: iv.toString('base64'), data: encrypted.toString('base64') });
+  const key = session.sharedKey; // Buffer 32
 
-})
+  const studentName = 'Филипюк Илья Андреевич';
+  const plain = studentName + '\n';
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}/`);
-})
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  const encrypted = Buffer.concat([cipher.update(Buffer.from(plain, 'utf8')), cipher.final()]);
+
+  res.json({ iv: iv.toString('base64'), data: encrypted.toString('base64') });
+});
+
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
