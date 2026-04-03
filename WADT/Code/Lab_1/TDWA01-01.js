@@ -70,6 +70,7 @@ app.post('/NGINX-test',(req,res)=>{
         if(!payload||typeof(payload)!='object'){
             return res.status(400).json({error:"Payload was empty or of an invalid format"});
         }
+        console.log(payload);
         if(typeof(payload.op)!='string'||typeof(payload.x)!='number'||typeof(payload.y)!='number'){
             return res.status(400).json({error:"Invalid request fields"});
         }
