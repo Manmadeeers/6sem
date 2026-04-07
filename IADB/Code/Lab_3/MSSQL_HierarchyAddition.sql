@@ -1,193 +1,273 @@
 use Warehouse;
 
 go
---1: adding heirarchyid datatype clumn to users table
-alter table Users add Org_path hierarchyid;
-alter table Users add Org_level as Org_path.GetLevel();
+--1: alter table Stocks to add hierarchyid column there
+alter table Stocks add node_path hierarchyid;
 
-select * from Users;
+create  index ix_Stocks_node_path on Stocks(node_path);
+
+alter table Stocks add storage_level as node_path.GetLevel();
+
+select * from Stocks;
+
+insert into Stocks (Capacity,Filled_part,Description,node_path)
+values (100000,0,'Main Warehouse Facility',hierarchyid::GetRoot());
+
+update Stocks
+set node_path=hierarchyid::GetRoot()
+where Stock_ID = 11;
+
+--2:procedure to print all descendants of a certain parent
 
 go
 
---2: creating a procedure to return all subordinates of a specified user
-create or alter procedure sp_GetAllSubordiates
-	@UserID int
+create or alter procedure sp_GetStorageSubordinates
+	@ParentStockID int
 as
 begin
 	set nocount on;
 
-	declare @ManagePath hierarchyid;
+	declare @ParentPah hierarchyid;
+	select @ParentPah = node_path
+	from Stocks
+	where Stock_ID=@ParentStockID;
 
-	select @ManagePath = Org_path
-	from Users
-	where User_ID = @UserID;
-
-	if @ManagePath is null
+	if @ParentPah is null
 	begin
-		raiserror('User not found or does not have an org_path',16,1);
+		raiserror('Storage with this id not found',16,1);
 		return;
 	end;
 
 	select
-        User_ID,
-        Email,
-        Role,
-        Org_path.ToString() AS [String_Path],
-		Org_level as [Hierarchy_level],
-		Created_at
-    from Users
-    where Org_path.IsDescendantOf(@ManagePath) = 1
-    order by Org_path;
-
+		Stock_ID,
+		Description as [StorageName],
+		node_path.ToString() as [HierarchyPath],
+		storage_level as [Level],
+		Capacity,
+		Filled_part
+	from Stocks
+	where node_path.IsDescendantOf(@ParentPah)=1
+		and Stock_ID <> @ParentStockID
+	order by
+		node_path;
 end;
 
-go;
+exec sp_GetStorageSubordinates 11;
 
-update Users
-set Org_path=hierarchyid::GetRoot()
-where User_ID=1;
-
-select * from Users;
-
-exec dbo.sp_GetAllSubordiates @UserID=1;
+select * from Stocks;
 
 
---3: creating a procedure to add a subordinate from an existing list of users and a new user as a subordinate
+--3: procedures to add descendants to stocks
+
 go
 
-create or alter procedure sp_AddSubordinate
+create or alter procedure sp_AddStorageLocation
+	@ParentStockID int,
+	@Capacity int,
+	@Description nvarchar(100)
+as
+begin
+	set nocount on;
+
+	declare @ParentPath hierarchyid;
+	declare @LastChildPath hierarchyid;
+	declare @NewPath hierarchyid;
+
+	select @ParentPath  = node_path
+	from Stocks
+	where Stock_ID = @ParentStockID;
+
+	if @ParentPath is null
+	begin
+		raiserror('Unable to add a descendant to this parent',16,1);
+		return;
+	end;
+
+	select @LastChildPath = MAX(node_path)
+	from Stocks
+	where node_path.GetAncestor(1)=@ParentPath;
+
+	set @NewPath = @ParentPath.GetDescendant(@LastChildPath,NULL);
+
+	insert into Stocks (Capacity,Filled_part,Description,node_path)
+	values (@Capacity, 0,@Description,@NewPath);
+
+	select SCOPE_IDENTITY() as NewStockID;
+end;
+
+select * from Stocks;
+exec sp_AddStorageLocation 1036, 25, 'Reserve compartment';
+exec sp_AddStorageLocation 1035, 25, 'Reserve cealed compartment';
+go
+
+create or alter procedure sp_AlterDescendantsParent
 	@ParentID int,
 	@ChildID int
 as
 begin
 	set nocount on;
-	set xact_abort on;
+	set transaction isolation level serializable;
 
-	declare @ParentPath hierarchyid;
-	declare @LastChildPath hierarchyid;
-	declare @NewNodePath hierarchyid;
+	begin transaction
+	begin try
+		declare @ParentPath hierarchyid;
+		declare @OldChildPth hierarchyid;
+		declare @LastChildPath hierarchyid;
+		declare @NewChildPath hierarchyid;
 
-	begin transaction;
-		select @ParentPath = Org_path
-		from Users
-		where User_ID = @ParentID;
-
-		if @ParentPath is null
-			begin
-				rollback transaction;
-				raiserror('Specified user not found or does not have a hierarchycal path',16,1);
-				return;
-			end;
-
-			select @LastChildPath = MAX(Org_path)
-			from Users
-			where Org_path.GetAncestor(1) = @ParentPath;
-
-			set @NewNodePath = @ParentPath.GetDescendant(@LastChildPath,null);
-			
-			update Users
-			set Org_path = @NewNodePath
-			where User_ID=@ChildID;
-
-			commit transaction;
-
-end;
-
-select * from Users;
-exec dbo.sp_AddSubordinate @ParentID=1, @ChildID=5;
-
-exec dbo.sp_AddSubordinate @ParentID=1, @ChildID=2;
-exec dbo.sp_AddSubordinate @ParentID=2, @ChildID=3;
-exec dbo.sp_AddSubordinate @ParentID=2, @ChildID=4;
-
-go;
-
-create or alter procedure sp_AddSubordinateFull
-	@ParentID int,
-	@Email varchar(255),
-	@Role varchar(30),
-	@PasswordHash varbinary(64)
-as
-begin
-	set nocount on;
-	set xact_abort on;
-
-	declare @ParentPath hierarchyid;
-	declare @LastChildPath hierarchyid;
-	declare @NewNodePath hierarchyid;
-
-	begin transaction;
-		select @ParentPath= Org_path
-		from Users
-		where User_ID = @ParentID;
+		select @ParentPath = node_path
+		from Stocks
+		where Stock_ID =@ParentID;
 
 		if @ParentPath is null
-			begin
-				rollback transaction;
-				raiserror('Specified user not found or does not have a hierarchycal path',16,1);
-				return;
-			end;
-
-			select @LastChildPath = MAX(Org_path)
-			from Users
-			where Org_path.GetAncestor(1) = @ParentPath;
-
-			set @NewNodePath = @ParentPath.GetDescendant(@LastChildPath,null);
-			
-			insert into Users (Email, Role,Password_hash,Org_path)
-			values (@Email, @Role, @PasswordHash,@NewNodePath);
-
-			select SCOPE_IDENTITY() as NewUserID;
-			commit transaction;
-end;
-
-exec dbo.sp_AddSubordinateFull @ParentID=2, @Email='subordinate2@warehouse.com', @Role='Manager', @PasswordHash=0xBCD2356;
-
-select * from users;
-
---4:creatign a procedure to move a whole branch of subordinates from one root to another
-go;
-
-create or alter procedure sp_Movesubordinates
-	@OldParentID int,
-	@NewParentID int
-as
-begin
-	set nocount on;
-	set xact_abort on;
-
-	declare @OldParentPath hierarchyid;
-	declare @NewParentPath hierarchyid;
-
-	begin transaction;
-		select @OldParentPath = Org_path
-		from Users
-		where User_ID=@OldParentID;
-
-		select @NewParentPath = Org_path
-		from Users
-		where User_ID=@NewParentID;
-
-		if @OldParentPath is null or @NewParentPath is null
 		begin
-			raiserror('One of specified parents not found',16,1);
-			rollback transaction;
-			return;
+			THROW 50001, 'Parent path not found or does not have a node_path', 1;
+		end
+
+		select @OldChildPth = node_path
+		from Stocks
+		where Stock_ID=@ChildID;
+
+		select @LastChildPath = MAX(node_path)
+		from Stocks
+		where node_path.GetAncestor(1)=@ParentPath;
+
+		set @NewChildPath = @ParentPath.GetDescendant(@LastChildPath,NULL);
+
+		if @OldChildPth is not null
+		begin
+			update Stocks
+			set node_path = node_path.GetReparentedValue(@OldChildPth,@NewChildPath)
+			where node_path.IsDescendantOf(@OldChildPth)=1;
+		end
+		else
+		begin
+			update Stocks
+			set node_path = @NewChildPath
+			where Stock_ID=@ChildID;
 		end;
 
-		update users
-		set Org_path = Org_path.GetReparentedValue(@OldParentPath,@NewParentPath)
-		where Org_path.IsDescendantOf(@OldParentPath)=1
-		and Org_path <> @OldParentPath;
+		commit transaction;
 
-		select @@ROWCOUNT as MovedUsers;
-
-	commit transaction;
+	end try
+	begin catch
+		if @@TRANCOUNT>0 rollback transaction;
+		declare @ErrMsg nvarchar(4000) = ERROR_MESSAGE();
+		raiserror(@ErrMsg,16,1);
+	end catch
 end;
 
+select * from Stocks;
+exec sp_AlterDescendantsParent 11, 1;
+exec sp_AlterDescendantsParent 11, 2;
+exec sp_AlterDescendantsParent 11, 3;
+exec sp_AlterDescendantsParent 11, 4;
+exec sp_AlterDescendantsParent 11, 5;
+exec sp_AlterDescendantsParent 11, 6;
+exec sp_AlterDescendantsParent 11, 7;
+exec sp_AlterDescendantsParent 11, 8;
+exec sp_AlterDescendantsParent 11, 9;
+exec sp_AlterDescendantsParent 11, 10;
+exec sp_AlterDescendantsParent 11, 12;
 
-select * from Users;
+--4: procedure to move branches of descendats between parents
 
-exec dbo.sp_Movesubordinates @OldParentID=5, @NewParentID=2;
+go
+
+create or alter procedure sp_SwapStorageDescendants
+	@SrcNodeId int,
+	@DestNodeId int
+as
+begin
+	set nocount on;
+	set transaction isolation level serializable;
+	begin transaction;
+	begin try
+		declare @SrcPath hierarchyid;
+		declare @DestPath hierarchyid;
+		select @SrcPath = node_path
+		from stocks
+		where stock_id = @SrcNodeId;
+		select @DestPath = node_path
+		from stocks
+		where stock_id = @DestNodeId;
+		if @SrcPath is null or @DestPath is null
+		begin
+			throw 50000, 'Parent nodes not found.', 1;
+		end;
+		if object_id('tempdb..#NodeMap') is not null drop table #NodeMap;
+		create table #NodeMap (
+			Rel_Path nvarchar(4000),
+			Src_Stock_ID int,
+			Dest_Stock_ID int,
+			Src_Capacity int,
+			Src_Filled_Part int,
+			Src_Description nvarchar(100),
+			Dest_Capacity int,
+			Dest_Filled_Part int,
+			Dest_Description nvarchar(100)
+		);
+		insert into #NodeMap (Rel_Path, Src_Stock_ID, Src_Capacity, Src_Filled_Part, Src_Description)
+		select 
+			substring(node_path.ToString(), len(@SrcPath.ToString()), 4000),
+			stock_id, capacity, filled_part, description
+		from stocks
+		where node_path.IsDescendantOf(@SrcPath) = 1 
+			and node_path <> @SrcPath;
+		update m
+		set 
+			m.Dest_Stock_ID = s.stock_id,
+			m.Dest_Capacity = s.capacity,
+			m.Dest_Filled_Part = s.filled_part,
+			m.Dest_Description = s.description
+		from #NodeMap m
+		join stocks s on substring(s.node_path.ToString(), len(@DestPath.ToString()), 4000) = m.Rel_Path
+		where s.node_path.IsDescendantOf(@DestPath) = 1 
+			and s.node_path <> @DestPath;
+		update s
+		set 
+			s.capacity = m.Dest_Capacity,
+			s.filled_part = m.Dest_Filled_Part,
+			s.description = m.Dest_Description
+		from stocks s
+		join #NodeMap m on s.stock_id = m.Src_Stock_ID
+		where m.Dest_Stock_ID is not null;
+		update s
+		set 
+			s.capacity = m.Src_Capacity,
+			s.filled_part = m.Src_Filled_Part,
+			s.description = m.Src_Description
+		from stocks s
+		join #NodeMap m on s.stock_id = m.Dest_Stock_ID
+		where m.Src_Stock_ID is not null;
+		update stocks
+		set node_path = node_path.GetReparentedValue(@SrcPath, @DestPath)
+		where stock_id in (
+			select Src_Stock_ID 
+			from #NodeMap 
+			where Dest_Stock_ID is null
+		);
+		update stocks
+		set node_path = node_path.GetReparentedValue(@DestPath, @SrcPath)
+		where node_path.IsDescendantOf(@DestPath) = 1 
+			and node_path <> @DestPath
+			and stock_id not in (
+				select Dest_Stock_ID 
+				from #NodeMap 
+				where Dest_Stock_ID is not null
+			);
+		drop table #NodeMap;
+		commit transaction;
+	end try
+	begin catch
+		if @@trancount > 0 rollback transaction;
+		throw;
+	end catch;
+end;
+
+exec sp_GetStorageSubordinates 11;
+
+exec sp_SwapStorageDescendants 1,2;
+select * from Stocks;
 
 
