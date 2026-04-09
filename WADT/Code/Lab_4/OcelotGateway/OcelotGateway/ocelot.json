@@ -1,0 +1,56 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/A",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 3000
+        }
+      ],
+      "UpstreamPathTemplate": "/api",
+      "UpstreamHttpMethod": [ "GET" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/A",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 3001
+        }
+      ],
+      "UpstreamPathTemplate": "/api",
+      "UpstreamHttpMethod": [ "POST" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/A",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 3001
+        }
+      ],
+      "UpstreamPathTemplate": "/api",
+      "UpstreamHttpMethod": [ "PUT" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/A",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 3002
+        }
+      ],
+      "UpstreamPathTemplate": "/api",
+      "UpstreamHttpMethod": [ "DELETE" ],
+      "Priority": 1
+    }
+  ]
+}
