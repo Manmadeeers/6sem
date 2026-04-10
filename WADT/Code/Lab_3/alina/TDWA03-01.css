@@ -1,0 +1,143 @@
+/* Minimalistic, neutral UI for HTTP method cards
+   - JSON inputs (textarea) and JSON result areas (monospace)
+   - Distinct method colors, slightly lighter dark theme */
+
+/* Reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height: 100%; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f6f8; color: #0f1724; }
+
+/* Layout */
+.container {
+  min-height: 100vh;
+  max-width: 1100px;
+  margin: 36px auto;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  padding: 0 20px;
+}
+
+/* Card */
+.fetch-card {
+  background: linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  border: 1px solid rgba(15,23,36,0.06);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 8px 20px rgba(15,23,36,0.04);
+  transition: transform .12s ease, box-shadow .12s ease;
+  min-width: 0;
+}
+.fetch-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(15,23,36,0.06); }
+
+/* Header row */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #0f1724;
+  margin: 0;
+}
+
+/* Buttons */
+.fetch-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .08s ease, filter .08s ease;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.06);
+}
+
+/* Method colors */
+.btn-get { background: #0ea5a4; }    /* teal */
+.btn-post { background: #2563eb; }   /* blue */
+.btn-put { background: #f59e0b; color: #111; } /* amber */
+.btn-delete { background: #ef4444; } /* red */
+
+.fetch-button:hover { transform: translateY(-2px); filter: brightness(.98); }
+.fetch-button:active { transform: translateY(0); }
+
+/* Input label + textarea (JSON) */
+.input-label {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-left: 2px;
+}
+.json-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  font-size: 0.9rem;
+  color: #0b1220;
+  background: #fcfdff;
+  border: 1px solid rgba(15,23,36,0.06);
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+  min-height: 84px;
+  outline: none;
+  line-height: 1.4;
+}
+
+/* Result area (prettified JSON) */
+.result {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-size: 0.9rem;
+  background: linear-gradient(180deg,#fbfdff 0%,#ffffff 100%);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 72px;
+  color: #0b1220;
+  border: 1px dashed rgba(15,23,36,0.04);
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Small helper / status text inside results */
+.result .meta { display: block; font-size: 0.78rem; color: #64748b; margin-bottom: 8px; }
+
+/* Responsive */
+@media (max-width: 560px) {
+  .container { margin: 18px auto; gap: 12px; grid-template-columns: 1fr; }
+  .fetch-card { padding: 12px; }
+}
+
+/* Light accessibility tweak */
+.fetch-card:focus-within { box-shadow: 0 10px 30px rgba(2,6,23,0.06); border-color: rgba(37,99,235,0.12); }
+
+/* Dark mode — slightly lighter than typical dark theme */
+@media (prefers-color-scheme: dark) {
+  html,body { background: #0f1724; color: #e6eef8; }
+  .fetch-card {
+    background: linear-gradient(180deg,#111827 0%,#0b1220 100%);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: none;
+  }
+  .card-header h3 { color: #e6eef8; }
+  .json-input {
+    background: #0b1117;
+    color: #e6eef8;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .result {
+    background: linear-gradient(180deg,#0b1117 0%,#071018 100%);
+    color: #e6eef8;
+    border: 1px dashed rgba(255,255,255,0.03);
+  }
+  /* Adjust button colors for dark background (slightly brighter) */
+  .btn-get { background: #2dd4bf; color: #042023; }
+  .btn-post { background: #60a5fa; color: #04203a; }
+  .btn-put { background: #fbbf24; color: #111827; }
+  .btn-delete { background: #fb7185; color: #2b0216; }
+}
