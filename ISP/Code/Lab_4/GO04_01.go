@@ -103,15 +103,14 @@ func AddCelebrityHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, `{"status": 409, "message": "ID %d alrwady exists"}`, newCelebrity.Id)
 			return
 		}
-
-		celebrities = append(celebrities, newCelebrity)
-		updatedData, _ := json.MarshalIndent(celebrities, "", "	")
-		os.WriteFile("Celebrities.json", updatedData, 0644)
-
-		w.Header().Set("Content-type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(newCelebrity)
 	}
+	celebrities = append(celebrities, newCelebrity)
+	updatedData, _ := json.MarshalIndent(celebrities, "", "	")
+	os.WriteFile("Celebrities.json", updatedData, 0644)
+
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newCelebrity)
 }
 
 func UpdateCelebrityHandler(w http.ResponseWriter, r *http.Request) {
