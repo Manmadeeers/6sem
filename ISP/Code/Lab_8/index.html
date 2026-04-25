@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golang WS</title>
+</head>
+<body>
+    
+</body>
+<script>
+    function dialWS(){
+        const url = "ws://localhost:4000/ws";
+
+        const socket = new WebSocket(url);
+        socket.onmessage = function(event){
+            console.log("Received from server: ",event);
+        }
+        setInterval(()=>{
+            socket.send("Message from JS");
+        },1000);
+        setTimeout(()=>{
+            socket.close(1000)
+        },5000)
+    }
+
+    dialWS();
+</script>
+</html>
