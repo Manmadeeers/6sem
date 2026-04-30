@@ -206,3 +206,79 @@ end;
 
 select * from Stocks;
 exec sp_swap_slaves(10,11);
+
+set serveroutput on;
+begin
+    sp_print_tree(27);
+end;
+
+select * from Stocks;
+
+begin
+    sp_move_all_children(11, 10);
+end;
+/
+
+
+create or replace procedure sp_move_all_children(
+    p_source_parent_id number,
+    p_target_parent_id number
+)
+as
+    v_exists number;
+    v_bad_target number;
+begin
+    if p_source_parent_id = p_target_parent_id then
+        raise_application_error(-20020, 'Source and target parents must be different');
+    end if;
+
+    select count(*)
+    into v_exists
+    from stocks
+    where stock_id = p_source_parent_id;
+
+    if v_exists = 0 then
+        raise_application_error(-20021, 'Source parent not found');
+    end if;
+
+    select count(*)
+    into v_exists
+    from stocks
+    where stock_id = p_target_parent_id;
+
+    if v_exists = 0 then
+        raise_application_error(-20022, 'Target parent not found');
+    end if;
+
+    -- Check whether target is inside source subtree
+    select count(*)
+    into v_bad_target
+    from (
+        select stock_id
+        from stocks
+        start with stock_id = p_source_parent_id
+        connect by prior stock_id = parent_id
+    )
+    where stock_id = p_target_parent_id;
+
+    if v_bad_target > 0 then
+        raise_application_error(-20023, 'Target parent cannot be inside source subtree');
+    end if;
+
+    update stocks
+    set parent_id = p_target_parent_id
+    where parent_id = p_source_parent_id;
+
+    commit;
+
+    dbms_output.put_line(
+        'All children of parent ' || p_source_parent_id ||
+        ' were moved to parent ' || p_target_parent_id
+    );
+
+exception
+    when others then
+        rollback;
+        raise;
+end;
+/

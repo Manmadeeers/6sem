@@ -1,273 +1,424 @@
-use Warehouse;
+USE Warehouse;
+GO
 
-go
---1: alter table Stocks to add hierarchyid column there
-alter table Stocks add node_path hierarchyid;
+-- 1. Add hierarchyid column and helper objects
+IF COL_LENGTH('dbo.Stocks', 'node_path') IS NULL
+    ALTER TABLE dbo.Stocks ADD node_path hierarchyid NULL;
+GO
 
-create  index ix_Stocks_node_path on Stocks(node_path);
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'ix_Stocks_node_path'
+      AND object_id = OBJECT_ID('dbo.Stocks')
+)
+    CREATE INDEX ix_Stocks_node_path ON dbo.Stocks(node_path);
+GO
 
-alter table Stocks add storage_level as node_path.GetLevel();
+IF COL_LENGTH('dbo.Stocks', 'storage_level') IS NULL
+    ALTER TABLE dbo.Stocks ADD storage_level AS node_path.GetLevel();
+GO
+
 
 select * from Stocks;
 
-insert into Stocks (Capacity,Filled_part,Description,node_path)
-values (100000,0,'Main Warehouse Facility',hierarchyid::GetRoot());
-
-update Stocks
-set node_path=hierarchyid::GetRoot()
-where Stock_ID = 11;
-
---2:procedure to print all descendants of a certain parent
-
 go
+-- 2. Get full subtree by hierarchyid
+CREATE OR ALTER PROCEDURE dbo.GetStorageHierarchy
+    @ParentNode hierarchyid
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-create or alter procedure sp_GetStorageSubordinates
-	@ParentStockID int
-as
-begin
-	set nocount on;
+    IF @ParentNode IS NULL
+        THROW 50001, 'Parent node cannot be NULL.', 1;
 
-	declare @ParentPah hierarchyid;
-	select @ParentPah = node_path
-	from Stocks
-	where Stock_ID=@ParentStockID;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.Stocks
+        WHERE node_path = @ParentNode
+    )
+        THROW 50002, 'Parent node not found in Stocks.', 1;
 
-	if @ParentPah is null
-	begin
-		raiserror('Storage with this id not found',16,1);
-		return;
-	end;
+    SELECT
+        Stock_ID,
+        Description AS StorageName,
+        node_path.ToString() AS Node_Path,
+        node_path.GetLevel() AS Hierarchy_Level,
+        Capacity,
+        Filled_part
+    FROM dbo.Stocks
+    WHERE node_path.IsDescendantOf(@ParentNode) = 1
+    ORDER BY node_path;
+END
+GO
 
-	select
-		Stock_ID,
-		Description as [StorageName],
-		node_path.ToString() as [HierarchyPath],
-		storage_level as [Level],
-		Capacity,
-		Filled_part
-	from Stocks
-	where node_path.IsDescendantOf(@ParentPah)=1
-		and Stock_ID <> @ParentStockID
-	order by
-		node_path;
-end;
+-- 3. Add child under a hierarchyid parent
+CREATE OR ALTER PROCEDURE dbo.AddStorageChild
+    @ParentNode hierarchyid,
+    @Capacity int,
+    @Description nvarchar(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-exec sp_GetStorageSubordinates 11;
+    IF @ParentNode IS NULL
+        THROW 50003, 'Parent node cannot be NULL.', 1;
 
-select * from Stocks;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.Stocks
+        WHERE node_path = @ParentNode
+    )
+        THROW 50004, 'Parent node not found in Stocks.', 1;
 
+    DECLARE @LastChild hierarchyid;
+    DECLARE @NewNode hierarchyid;
 
---3: procedures to add descendants to stocks
+    SELECT @LastChild = MAX(node_path)
+    FROM dbo.Stocks
+    WHERE node_path.GetAncestor(1) = @ParentNode;
 
-go
+    SET @NewNode = @ParentNode.GetDescendant(@LastChild, NULL);
 
-create or alter procedure sp_AddStorageLocation
-	@ParentStockID int,
-	@Capacity int,
-	@Description nvarchar(100)
-as
-begin
-	set nocount on;
+    INSERT INTO dbo.Stocks (Capacity, Filled_part, Description, node_path)
+    VALUES (@Capacity, 0, @Description, @NewNode);
 
-	declare @ParentPath hierarchyid;
-	declare @LastChildPath hierarchyid;
-	declare @NewPath hierarchyid;
+    SELECT
+        CAST(SCOPE_IDENTITY() AS int) AS NewStockID,
+        @NewNode.ToString() AS NewNodePath;
+END
+GO
 
-	select @ParentPath  = node_path
-	from Stocks
-	where Stock_ID = @ParentStockID;
+-- 4. Move whole subtree to another hierarchyid parent
+CREATE OR ALTER PROCEDURE dbo.MoveStorageSubtree
+    @OldParent hierarchyid,
+    @NewParent hierarchyid
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
-	if @ParentPath is null
-	begin
-		raiserror('Unable to add a descendant to this parent',16,1);
-		return;
-	end;
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        IF @OldParent IS NULL OR @NewParent IS NULL
+            THROW 50005, 'Both node parameters are required.', 1;
 
-	select @LastChildPath = MAX(node_path)
-	from Stocks
-	where node_path.GetAncestor(1)=@ParentPath;
+        IF NOT EXISTS (
+            SELECT 1
+            FROM dbo.Stocks
+            WHERE node_path = @OldParent
+        )
+            THROW 50006, 'Old parent node not found.', 1;
 
-	set @NewPath = @ParentPath.GetDescendant(@LastChildPath,NULL);
+        IF NOT EXISTS (
+            SELECT 1
+            FROM dbo.Stocks
+            WHERE node_path = @NewParent
+        )
+            THROW 50007, 'New parent node not found.', 1;
 
-	insert into Stocks (Capacity,Filled_part,Description,node_path)
-	values (@Capacity, 0,@Description,@NewPath);
+        IF @OldParent = hierarchyid::GetRoot()
+            THROW 50008, 'The root node cannot be moved.', 1;
 
-	select SCOPE_IDENTITY() as NewStockID;
-end;
+        IF @NewParent.IsDescendantOf(@OldParent) = 1
+            THROW 50009, 'Cannot move a node under its own descendant.', 1;
 
-select * from Stocks;
-exec sp_AddStorageLocation 1036, 25, 'Reserve compartment';
-exec sp_AddStorageLocation 1035, 25, 'Reserve cealed compartment';
-go
+        DECLARE @LastChild hierarchyid;
+        DECLARE @NewRoot hierarchyid;
 
-create or alter procedure sp_AlterDescendantsParent
-	@ParentID int,
-	@ChildID int
-as
-begin
-	set nocount on;
-	set transaction isolation level serializable;
+        SELECT @LastChild = MAX(node_path)
+        FROM dbo.Stocks
+        WHERE node_path.GetAncestor(1) = @NewParent
+          AND node_path.IsDescendantOf(@OldParent) = 0;
 
-	begin transaction
-	begin try
-		declare @ParentPath hierarchyid;
-		declare @OldChildPth hierarchyid;
-		declare @LastChildPath hierarchyid;
-		declare @NewChildPath hierarchyid;
+        SET @NewRoot = @NewParent.GetDescendant(@LastChild, NULL);
 
-		select @ParentPath = node_path
-		from Stocks
-		where Stock_ID =@ParentID;
+        UPDATE dbo.Stocks
+        SET node_path = node_path.GetReparentedValue(@OldParent, @NewRoot)
+        WHERE node_path.IsDescendantOf(@OldParent) = 1;
 
-		if @ParentPath is null
-		begin
-			THROW 50001, 'Parent path not found or does not have a node_path', 1;
-		end
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+GO
 
-		select @OldChildPth = node_path
-		from Stocks
-		where Stock_ID=@ChildID;
+-- Demo data
+DELETE FROM dbo.Stocks;
+DBCC CHECKIDENT ('dbo.Stocks', RESEED, 0);
+GO
 
-		select @LastChildPath = MAX(node_path)
-		from Stocks
-		where node_path.GetAncestor(1)=@ParentPath;
+INSERT INTO dbo.Stocks (Capacity, Filled_part, Description)
+VALUES
+(100000, 0, N'Main Warehouse Facility'), -- /
+(60000, 0, N'Zone A'),                   -- /1/
+(40000, 0, N'Zone B'),                   -- /2/
+(20000, 0, N'Rack A1'),                  -- /1/1/
+(15000, 0, N'Rack A2'),                  -- /1/2/
+(25000, 0, N'Rack B1'),                  -- /2/1/
+(10000, 0, N'Rack B2');                  -- /2/2/
+GO
 
-		set @NewChildPath = @ParentPath.GetDescendant(@LastChildPath,NULL);
+UPDATE dbo.Stocks SET node_path = hierarchyid::GetRoot()       WHERE Stock_ID = 1;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/1/')    WHERE Stock_ID = 2;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/2/')    WHERE Stock_ID = 3;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/1/1/')  WHERE Stock_ID = 4;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/1/2/')  WHERE Stock_ID = 5;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/2/1/')  WHERE Stock_ID = 6;
+UPDATE dbo.Stocks SET node_path = hierarchyid::Parse('/2/2/')  WHERE Stock_ID = 7;
+GO
 
-		if @OldChildPth is not null
-		begin
-			update Stocks
-			set node_path = node_path.GetReparentedValue(@OldChildPth,@NewChildPath)
-			where node_path.IsDescendantOf(@OldChildPth)=1;
-		end
-		else
-		begin
-			update Stocks
-			set node_path = @NewChildPath
-			where Stock_ID=@ChildID;
-		end;
+SELECT
+    Stock_ID,
+    Description,
+    node_path.ToString() AS Node_Path,
+    Capacity,
+    Filled_part
+FROM dbo.Stocks
+ORDER BY node_path;
+GO
 
-		commit transaction;
+-- 2. Read hierarchy
+DECLARE @node hierarchyid;
+SET @node = hierarchyid::Parse('/');
+EXEC dbo.GetStorageHierarchy @ParentNode = @node;
+GO
 
-	end try
-	begin catch
-		if @@TRANCOUNT>0 rollback transaction;
-		declare @ErrMsg nvarchar(4000) = ERROR_MESSAGE();
-		raiserror(@ErrMsg,16,1);
-	end catch
-end;
+DECLARE @node2 hierarchyid;
+SET @node2 = hierarchyid::Parse('/2/');
+EXEC dbo.GetStorageHierarchy @ParentNode = @node2;
+GO
 
-select * from Stocks;
-exec sp_AlterDescendantsParent 11, 1;
-exec sp_AlterDescendantsParent 11, 2;
-exec sp_AlterDescendantsParent 11, 3;
-exec sp_AlterDescendantsParent 11, 4;
-exec sp_AlterDescendantsParent 11, 5;
-exec sp_AlterDescendantsParent 11, 6;
-exec sp_AlterDescendantsParent 11, 7;
-exec sp_AlterDescendantsParent 11, 8;
-exec sp_AlterDescendantsParent 11, 9;
-exec sp_AlterDescendantsParent 11, 10;
-exec sp_AlterDescendantsParent 11, 12;
+-- 3. Add child
+select * from stocks;
 
---4: procedure to move branches of descendats between parents
+DECLARE @ParentNode hierarchyid;
+SELECT @ParentNode = node_path
+FROM dbo.Stocks
+WHERE Stock_ID = 6;
 
-go
+EXEC dbo.AddStorageChild
+    @ParentNode = @ParentNode,
+    @Capacity = 5000,
+    @Description = N'Overflow Shelf B1';
+GO
 
-create or alter procedure sp_SwapStorageDescendants
-	@SrcNodeId int,
-	@DestNodeId int
-as
-begin
-	set nocount on;
-	set transaction isolation level serializable;
-	begin transaction;
-	begin try
-		declare @SrcPath hierarchyid;
-		declare @DestPath hierarchyid;
-		select @SrcPath = node_path
-		from stocks
-		where stock_id = @SrcNodeId;
-		select @DestPath = node_path
-		from stocks
-		where stock_id = @DestNodeId;
-		if @SrcPath is null or @DestPath is null
-		begin
-			throw 50000, 'Parent nodes not found.', 1;
-		end;
-		if object_id('tempdb..#NodeMap') is not null drop table #NodeMap;
-		create table #NodeMap (
-			Rel_Path nvarchar(4000),
-			Src_Stock_ID int,
-			Dest_Stock_ID int,
-			Src_Capacity int,
-			Src_Filled_Part int,
-			Src_Description nvarchar(100),
-			Dest_Capacity int,
-			Dest_Filled_Part int,
-			Dest_Description nvarchar(100)
-		);
-		insert into #NodeMap (Rel_Path, Src_Stock_ID, Src_Capacity, Src_Filled_Part, Src_Description)
-		select 
-			substring(node_path.ToString(), len(@SrcPath.ToString()), 4000),
-			stock_id, capacity, filled_part, description
-		from stocks
-		where node_path.IsDescendantOf(@SrcPath) = 1 
-			and node_path <> @SrcPath;
-		update m
-		set 
-			m.Dest_Stock_ID = s.stock_id,
-			m.Dest_Capacity = s.capacity,
-			m.Dest_Filled_Part = s.filled_part,
-			m.Dest_Description = s.description
-		from #NodeMap m
-		join stocks s on substring(s.node_path.ToString(), len(@DestPath.ToString()), 4000) = m.Rel_Path
-		where s.node_path.IsDescendantOf(@DestPath) = 1 
-			and s.node_path <> @DestPath;
-		update s
-		set 
-			s.capacity = m.Dest_Capacity,
-			s.filled_part = m.Dest_Filled_Part,
-			s.description = m.Dest_Description
-		from stocks s
-		join #NodeMap m on s.stock_id = m.Src_Stock_ID
-		where m.Dest_Stock_ID is not null;
-		update s
-		set 
-			s.capacity = m.Src_Capacity,
-			s.filled_part = m.Src_Filled_Part,
-			s.description = m.Src_Description
-		from stocks s
-		join #NodeMap m on s.stock_id = m.Dest_Stock_ID
-		where m.Src_Stock_ID is not null;
-		update stocks
-		set node_path = node_path.GetReparentedValue(@SrcPath, @DestPath)
-		where stock_id in (
-			select Src_Stock_ID 
-			from #NodeMap 
-			where Dest_Stock_ID is null
-		);
-		update stocks
-		set node_path = node_path.GetReparentedValue(@DestPath, @SrcPath)
-		where node_path.IsDescendantOf(@DestPath) = 1 
-			and node_path <> @DestPath
-			and stock_id not in (
-				select Dest_Stock_ID 
-				from #NodeMap 
-				where Dest_Stock_ID is not null
-			);
-		drop table #NodeMap;
-		commit transaction;
-	end try
-	begin catch
-		if @@trancount > 0 rollback transaction;
-		throw;
-	end catch;
-end;
+-- 4. Move subtree
+DECLARE @old hierarchyid;
+DECLARE @new hierarchyid;
 
-exec sp_GetStorageSubordinates 11;
+SET @old = hierarchyid::Parse('/2/1/');
+SET @new = hierarchyid::Parse('/1/');
 
-exec sp_SwapStorageDescendants 1,2;
-select * from Stocks;
+EXEC dbo.MoveStorageSubtree
+    @OldParent = @old,
+    @NewParent = @new;
+GO
+
+SELECT
+    Stock_ID,
+    Description,
+    node_path.ToString() AS Node_Path,
+    Capacity,
+    Filled_part
+FROM dbo.Stocks
+ORDER BY node_path;
+GO
 
 
+CREATE OR ALTER PROCEDURE dbo.SwapStorageBranchChildren
+    @FirstNode hierarchyid,
+    @SecondNode hierarchyid
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        DECLARE @TempNode hierarchyid;
+        DECLARE @LastRootChild hierarchyid;
+
+        IF @FirstNode IS NULL OR @SecondNode IS NULL
+            THROW 50001, 'Both nodes are required.', 1;
+
+        IF @FirstNode = @SecondNode
+            THROW 50002, 'You cannot swap a branch with itself.', 1;
+
+        IF NOT EXISTS (SELECT 1 FROM dbo.Stocks WHERE node_path = @FirstNode)
+            THROW 50003, 'First node not found.', 1;
+
+        IF NOT EXISTS (SELECT 1 FROM dbo.Stocks WHERE node_path = @SecondNode)
+            THROW 50004, 'Second node not found.', 1;
+
+        IF @FirstNode.IsDescendantOf(@SecondNode) = 1
+            THROW 50005, 'Nested branches cannot be swapped this way.', 1;
+
+        IF @SecondNode.IsDescendantOf(@FirstNode) = 1
+            THROW 50006, 'Nested branches cannot be swapped this way.', 1;
+
+        SELECT @LastRootChild = MAX(node_path)
+        FROM dbo.Stocks
+        WHERE node_path.GetAncestor(1) = hierarchyid::GetRoot();
+
+        SET @TempNode = hierarchyid::GetRoot().GetDescendant(@LastRootChild, NULL);
+
+        -- Move children of the first branch to a temporary place
+        UPDATE dbo.Stocks
+        SET node_path = node_path.GetReparentedValue(@FirstNode, @TempNode)
+        WHERE node_path.IsDescendantOf(@FirstNode) = 1
+          AND node_path <> @FirstNode;
+
+        -- Move children of the second branch into the first branch
+        UPDATE dbo.Stocks
+        SET node_path = node_path.GetReparentedValue(@SecondNode, @FirstNode)
+        WHERE node_path.IsDescendantOf(@SecondNode) = 1
+          AND node_path <> @SecondNode;
+
+        -- Move saved children of the first branch into the second branch
+        UPDATE dbo.Stocks
+        SET node_path = node_path.GetReparentedValue(@TempNode, @SecondNode)
+        WHERE node_path.IsDescendantOf(@TempNode) = 1;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+
+
+CREATE OR ALTER PROCEDURE dbo.SwapStorageBranchChildrenById
+    @FirstStockID int,
+    @SecondStockID int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @FirstNode hierarchyid;
+    DECLARE @SecondNode hierarchyid;
+
+    SELECT @FirstNode = node_path
+    FROM dbo.Stocks
+    WHERE Stock_ID = @FirstStockID;
+
+    SELECT @SecondNode = node_path
+    FROM dbo.Stocks
+    WHERE Stock_ID = @SecondStockID;
+
+    EXEC dbo.SwapStorageBranchChildren
+        @FirstNode = @FirstNode,
+        @SecondNode = @SecondNode;
+END;
+GO
+
+
+
+
+CREATE OR ALTER PROCEDURE dbo.MoveAllChildrenToAnotherParent
+    @SourceParentID int,
+    @DestinationParentID int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        DECLARE @SourcePath hierarchyid;
+        DECLARE @DestinationPath hierarchyid;
+
+        SELECT @SourcePath = node_path
+        FROM dbo.Stocks
+        WHERE Stock_ID = @SourceParentID;
+
+        SELECT @DestinationPath = node_path
+        FROM dbo.Stocks
+        WHERE Stock_ID = @DestinationParentID;
+
+        IF @SourcePath IS NULL
+            THROW 50001, 'Source parent not found.', 1;
+
+        IF @DestinationPath IS NULL
+            THROW 50002, 'Destination parent not found.', 1;
+
+        IF @SourceParentID = @DestinationParentID
+            THROW 50003, 'Source and destination cannot be the same.', 1;
+
+        IF @DestinationPath.IsDescendantOf(@SourcePath) = 1
+           AND @DestinationPath <> @SourcePath
+            THROW 50004, 'Destination parent cannot be inside the source branch.', 1;
+
+        DECLARE @Children TABLE
+        (
+            RowNum int identity(1,1) primary key,
+            ChildPath hierarchyid
+        );
+
+        INSERT INTO @Children (ChildPath)
+        SELECT node_path
+        FROM dbo.Stocks
+        WHERE node_path.GetAncestor(1) = @SourcePath
+        ORDER BY node_path;
+
+        DECLARE @i int = 1;
+        DECLARE @cnt int;
+        DECLARE @OldChildPath hierarchyid;
+        DECLARE @LastChildPath hierarchyid;
+        DECLARE @NewChildPath hierarchyid;
+
+        SELECT @cnt = COUNT(*) FROM @Children;
+
+        WHILE @i <= @cnt
+        BEGIN
+            SELECT @OldChildPath = ChildPath
+            FROM @Children
+            WHERE RowNum = @i;
+
+            SELECT @LastChildPath = MAX(node_path)
+            FROM dbo.Stocks
+            WHERE node_path.GetAncestor(1) = @DestinationPath;
+
+            SET @NewChildPath = @DestinationPath.GetDescendant(@LastChildPath, NULL);
+
+            UPDATE dbo.Stocks
+            SET node_path = node_path.GetReparentedValue(@OldChildPath, @NewChildPath)
+            WHERE node_path.IsDescendantOf(@OldChildPath) = 1;
+
+            SET @i += 1;
+        END
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+
+SELECT Stock_ID, Description, node_path.ToString() AS Path
+FROM dbo.Stocks
+ORDER BY node_path;
+GO
+
+EXEC dbo.MoveAllChildrenToAnotherParent
+    @SourceParentID = 2,
+    @DestinationParentID = 6
+GO
+
+SELECT Stock_ID, Description, node_path.ToString() AS Path
+FROM dbo.Stocks
+ORDER BY node_path;
+GO
