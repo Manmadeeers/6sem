@@ -1,94 +1,151 @@
-use Warehouse;
+USE warehouse;
+GO
 
---1
 
-DECLARE @ReportYear INT = NULL; -- например 2026; NULL = все годы
+--orders quantity, sum, packed and delivered positions, stocks load for a quarter, half-year and year
 
-WITH months AS (
-    SELECT DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start
-    FROM orders
-    UNION
-    SELECT DATEFROMPARTS(YEAR(pack_date), MONTH(pack_date), 1) AS month_start
-    FROM pack
-),
-orders_m AS (
+;WITH bounds AS
+(
     SELECT
-        DATEFROMPARTS(YEAR(o.order_date), MONTH(o.order_date), 1) AS month_start,
-        COUNT(*) AS orders_count,
-        SUM(o.total_amount) AS orders_amount,
-        SUM(CASE WHEN o.order_status = 'Shipped' THEN 1 ELSE 0 END) AS shipped_orders
-    FROM orders o
-    GROUP BY DATEFROMPARTS(YEAR(o.order_date), MONTH(o.order_date), 1)
+        DATEFROMPARTS(
+            YEAR(MIN(d.dt)),
+            MONTH(MIN(d.dt)),
+            1
+        ) AS min_month,
+        DATEFROMPARTS(
+            YEAR(MAX(d.dt)),
+            MONTH(MAX(d.dt)),
+            1
+        ) AS max_month
+    FROM
+    (
+        SELECT order_date AS dt FROM orders
+        UNION ALL
+        SELECT pack_date  AS dt FROM pack
+    ) d
 ),
-pack_m AS (
+months AS
+(
+    SELECT min_month AS month_start
+    FROM bounds
+
+    UNION ALL
+
+    SELECT DATEADD(MONTH, 1, m.month_start)
+    FROM months m
+    CROSS JOIN bounds b
+    WHERE m.month_start < b.max_month
+),
+orders_monthly AS
+(
+    SELECT
+        DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start,
+        COUNT(*) AS orders_count,
+        SUM(total_amount) AS orders_amount
+    FROM orders
+    -- если не нужны отмененные заказы, раскомментируйте:
+    -- WHERE order_status <> 'Canceled'
+    GROUP BY DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1)
+),
+pack_monthly AS
+(
     SELECT
         DATEFROMPARTS(YEAR(p.pack_date), MONTH(p.pack_date), 1) AS month_start,
-        COUNT(DISTINCT p.pack_id) AS packs_count,
-        SUM(CASE WHEN p.pack_status IN ('Packed', 'Shipped') THEN 1 ELSE 0 END) AS processed_packs,
-        SUM(CASE WHEN p.pack_status = 'Shipped' THEN 1 ELSE 0 END) AS shipped_packs,
-        SUM(pi.quantity) AS packed_items_qty,
-        SUM(CASE WHEN p.pack_status = 'Shipped' THEN pi.quantity ELSE 0 END) AS shipped_items_qty
+        SUM(CASE
+                WHEN p.pack_status IN ('Packed', 'Shipped') THEN pi.quantity
+                ELSE 0
+            END) AS packed_qty,
+        SUM(CASE
+                WHEN p.pack_status = 'Shipped' THEN pi.quantity
+                ELSE 0
+            END) AS shipped_qty
     FROM pack p
-    LEFT JOIN pack_items pi ON pi.pack_id = p.pack_id
+    JOIN pack_items pi
+        ON pi.pack_id = p.pack_id
     GROUP BY DATEFROMPARTS(YEAR(p.pack_date), MONTH(p.pack_date), 1)
 ),
-base AS (
+base AS
+(
     SELECT
         m.month_start,
         YEAR(m.month_start) AS [year_no],
         DATEPART(QUARTER, m.month_start) AS quarter_no,
-        CASE WHEN MONTH(m.month_start) <= 6 THEN 1 ELSE 2 END AS halfyear_no,
-
-        ISNULL(o.orders_count, 0) AS orders_count,
-        ISNULL(o.orders_amount, 0.0000) AS orders_amount,
-        ISNULL(o.shipped_orders, 0) AS shipped_orders,
-
-        ISNULL(p.packs_count, 0) AS packs_count,
-        ISNULL(p.processed_packs, 0) AS processed_packs,
-        ISNULL(p.shipped_packs, 0) AS shipped_packs,
-        ISNULL(p.packed_items_qty, 0) AS packed_items_qty,
-        ISNULL(p.shipped_items_qty, 0) AS shipped_items_qty
+        CASE
+            WHEN MONTH(m.month_start) BETWEEN 1 AND 6 THEN 1
+            ELSE 2
+        END AS halfyear_no,
+        ISNULL(o.orders_count, 0) AS orders_count_month,
+        ISNULL(o.orders_amount, 0.0000) AS orders_amount_month,
+        ISNULL(p.packed_qty, 0) AS packed_qty_month,
+        ISNULL(p.shipped_qty, 0) AS shipped_qty_month
     FROM months m
-    LEFT JOIN orders_m o ON o.month_start = m.month_start
-    LEFT JOIN pack_m p ON p.month_start = m.month_start
-    WHERE @ReportYear IS NULL OR YEAR(m.month_start) = @ReportYear
+    LEFT JOIN orders_monthly o
+        ON o.month_start = m.month_start
+    LEFT JOIN pack_monthly p
+        ON p.month_start = m.month_start
 )
 SELECT
     month_start,
-    year_no,
-    quarter_no,
-    halfyear_no,
 
-    -- Помесячные итоги
-    orders_count,
-    orders_amount,
-    shipped_orders,
-    packs_count,
-    processed_packs,
-    shipped_packs,
-    packed_items_qty,
-    shipped_items_qty,
+    orders_count_month,
+    orders_amount_month,
+    packed_qty_month,
+    shipped_qty_month,
 
-    -- Позиция месяца в периоде (ROW_NUMBER)
-    ROW_NUMBER() OVER (PARTITION BY year_no, quarter_no ORDER BY month_start) AS rn_in_quarter,
-    ROW_NUMBER() OVER (PARTITION BY year_no, halfyear_no ORDER BY month_start) AS rn_in_halfyear,
-    ROW_NUMBER() OVER (PARTITION BY year_no ORDER BY month_start) AS rn_in_year,
+    SUM(orders_count_month) OVER (
+        PARTITION BY year_no, quarter_no
+    ) AS orders_count_quarter,
 
-    -- Квартальные итоги (window)
-    SUM(orders_count)      OVER (PARTITION BY year_no, quarter_no) AS quarter_orders_count,
-    SUM(orders_amount)     OVER (PARTITION BY year_no, quarter_no) AS quarter_orders_amount,
-    SUM(shipped_items_qty) OVER (PARTITION BY year_no, quarter_no) AS quarter_shipped_items_qty,
+    SUM(orders_amount_month) OVER (
+        PARTITION BY year_no, quarter_no
+    ) AS orders_amount_quarter,
 
-    -- Полугодовые итоги (window)
-    SUM(orders_count)      OVER (PARTITION BY year_no, halfyear_no) AS halfyear_orders_count,
-    SUM(orders_amount)     OVER (PARTITION BY year_no, halfyear_no) AS halfyear_orders_amount,
-    SUM(shipped_items_qty) OVER (PARTITION BY year_no, halfyear_no) AS halfyear_shipped_items_qty,
+    SUM(packed_qty_month) OVER (
+        PARTITION BY year_no, quarter_no
+    ) AS packed_qty_quarter,
 
-    -- Годовые итоги (window)
-    SUM(orders_count)      OVER (PARTITION BY year_no) AS year_orders_count,
-    SUM(orders_amount)     OVER (PARTITION BY year_no) AS year_orders_amount,
-    SUM(shipped_items_qty) OVER (PARTITION BY year_no) AS year_shipped_items_qty
+    SUM(shipped_qty_month) OVER (
+        PARTITION BY year_no, quarter_no
+    ) AS shipped_qty_quarter,
+
+    SUM(orders_count_month) OVER (
+        PARTITION BY year_no, halfyear_no
+    ) AS orders_count_halfyear,
+
+    SUM(orders_amount_month) OVER (
+        PARTITION BY year_no, halfyear_no
+    ) AS orders_amount_halfyear,
+
+    SUM(packed_qty_month) OVER (
+        PARTITION BY year_no, halfyear_no
+    ) AS packed_qty_halfyear,
+
+    SUM(shipped_qty_month) OVER (
+        PARTITION BY year_no, halfyear_no
+    ) AS shipped_qty_halfyear,
+
+    SUM(orders_count_month) OVER (
+        PARTITION BY year_no
+    ) AS orders_count_year,
+
+    SUM(orders_amount_month) OVER (
+        PARTITION BY year_no
+    ) AS orders_amount_year,
+
+    SUM(packed_qty_month) OVER (
+        PARTITION BY year_no
+    ) AS packed_qty_year,
+
+    SUM(shipped_qty_month) OVER (
+        PARTITION BY year_no
+    ) AS shipped_qty_year
 
 FROM base
-ORDER BY month_start;
+ORDER BY month_start
+OPTION (MAXRECURSION 32767);
 GO
+
+
+--
+
+
