@@ -1,0 +1,14 @@
+services:
+  webdav:
+    build: .
+    container_name: nginx-webdav
+    ports:
+      - "8080:80"
+    volumes:
+      - webdav_data:/var/webdav
+      - ./webdav.conf:/etc/nginx/conf.d/webdav.conf:ro
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
+    restart: unless-stopped
+
+volumes:
+  webdav_data:
