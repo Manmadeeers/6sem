@@ -1,6 +1,188 @@
 USE warehouse;
 GO
 
+use warehouse;
+go
+
+if object_id('tempdb..#nums') is not null
+	drop table #nums;
+go
+
+select top(200)
+	row_number() over(order by (select null)) as n
+into #nums
+from sys.all_objects a
+cross join sys.all_objects b;
+go
+
+;with src as(
+select
+	row_number() over(order by stock_id) as rn,
+	capacity,
+	filled_part,
+	description
+from stocks
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into stocks(capacity,filled_part,description)
+select
+	s.capacity,
+	s.filled_part,
+	s.description
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by product_id) as rn,
+	stock_id,
+	name,
+	price,
+	quantity
+from products
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into products(stock_id,name,price,quantity)
+select
+	s.stock_id,
+	s.name,
+	s.price,
+	s.quantity
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by task_id) as rn,
+	user_id,
+	due_date,
+	priority,
+	description,
+	is_completed
+from tasks
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into tasks(user_id,due_date,priority,description,is_completed)
+select
+	s.user_id,
+	s.due_date,
+	s.priority,
+	s.description,
+	s.is_completed
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by order_id) as rn,
+	order_date,
+	order_status,
+	total_amount
+from orders
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into orders(order_date,order_status,total_amount)
+select
+	s.order_date,
+	s.order_status,
+	s.total_amount
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by item_id) as rn,
+	order_id,
+	product_id,
+	quantity
+from order_items
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into order_items(order_id,product_id,quantity)
+select
+	s.order_id,
+	s.product_id,
+	s.quantity
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by pack_id) as rn,
+	user_id,
+	order_id,
+	pack_date,
+	pack_status
+from pack
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into pack(user_id,order_id,pack_date,pack_status)
+select
+	s.user_id,
+	s.order_id,
+	s.pack_date,
+	s.pack_status
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+;with src as(
+select
+	row_number() over(order by item_id) as rn,
+	pack_id,
+	product_id,
+	quantity,
+	unit_price
+from pack_items
+),
+cnt as(
+select count(*) as c
+from src
+)
+insert into pack_items(pack_id,product_id,quantity,unit_price)
+select
+	s.pack_id,
+	s.product_id,
+	s.quantity,
+	s.unit_price
+from #nums n
+cross join cnt c
+join src s on c.c>0 and s.rn=((n.n-1)%c.c)+1;
+go
+
+drop table #nums;
+go
+
+
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 GO
