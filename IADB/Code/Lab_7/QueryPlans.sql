@@ -1,5 +1,4 @@
 --1: forecast for processed orders and sum of shipped orders for each operator for the next year(month-by-month) incrementing by 0.5%
-
 with monthly_stats as(
 select
 	u.user_id,
