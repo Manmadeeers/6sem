@@ -5,6 +5,8 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "!StrongPass123"
+    volumes:
+      - mssql_data:/var/opt/mssql
     networks:
       - tdwa_net
 
@@ -35,3 +37,6 @@ services:
 networks:
   tdwa_net:
     driver: bridge
+
+volumes:
+  mssql_data:
