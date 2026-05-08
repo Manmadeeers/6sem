@@ -213,6 +213,7 @@ def print_report(payload: dict, rsa: RSA, elgamal: ElGamal, rsa_result: dict, el
     print(f"Ciphertext / plaintext: {rsa_result['ratio']:.2f}x")
     print(f"Relative size growth: {rsa_result['growth_percent']:.2f}%")
     print(f"Restored correctly: {rsa_result['restored_ok']}")
+    print(f"Decrypted text: {rsa_result['restored_text']}")
     print(f"Cipher preview: {rsa_result['cipher_preview']}")
 
     print("\n" + "=" * 72)
@@ -224,6 +225,7 @@ def print_report(payload: dict, rsa: RSA, elgamal: ElGamal, rsa_result: dict, el
     print(f"Ciphertext / plaintext: {elgamal_result['ratio']:.2f}x")
     print(f"Relative size growth: {elgamal_result['growth_percent']:.2f}%")
     print(f"Restored correctly: {elgamal_result['restored_ok']}")
+    print(f"Decrypted text: {elgamal_result['restored_text']}")
     print(f"Cipher preview: {elgamal_result['cipher_preview']}")
 
     print("\n" + "=" * 72)
