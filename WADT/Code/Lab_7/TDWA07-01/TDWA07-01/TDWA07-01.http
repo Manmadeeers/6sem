@@ -1,6 +1,0 @@
-@TDWA07_01_HostAddress = http://localhost:5272
-
-GET {{TDWA07_01_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

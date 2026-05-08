@@ -1,0 +1,37 @@
+services:
+  mssql_2019:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql_2019
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "!StrongPass123"
+    networks:
+      - tdwa_net
+
+  nginx_tcp:
+    image: nginx:alpine
+    container_name: nginx_tcp
+    depends_on:
+      - mssql_2019
+    ports:
+      - "1444:1444"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - tdwa_net
+
+  tdwa07:
+    image: manmadee/tdwa07-01:latest
+    container_name: tdwa07
+    depends_on:
+      - nginx_tcp
+    environment:
+      CONNECTION_STRING: "Server=nginx_tcp,1444;Database=Celebrities;User Id=sa;Password=!StrongPass123;Encrypt=True;TrustServerCertificate=True;"
+    ports:
+      - "3000:3000"
+    networks:
+      - tdwa_net
+
+networks:
+  tdwa_net:
+    driver: bridge
