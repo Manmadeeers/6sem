@@ -15,7 +15,7 @@ type JRPCRequest struct {
 	JSONRPC string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params,omitempty"`
-	Id      interface{}     `json: "id,omitempty"`
+	ID      interface{}     `json:"id,omitempty"`
 }
 
 type JRPCResponse struct {
@@ -30,8 +30,12 @@ type RPCError struct {
 	Message string `json:"message"`
 }
 
+type PrecisionParams struct {
+	N int `json:"N"`
+}
+
 var (
-	precision      int = 2
+	precision      = 2
 	precisionMutex sync.RWMutex
 )
 
@@ -47,8 +51,9 @@ func resultFormatter(val float64) float64 {
 
 func RPCHandler(req JRPCRequest) *JRPCResponse {
 	if req.JSONRPC != "2.0" {
-		return &JRPCResponse{JSONRPC: "2.0", ID: req.Id, Error: &RPCError{-32600, "Invalid Request"}}
+		return &JRPCResponse{JSONRPC: "2.0", ID: req.ID, Error: &RPCError{-32600, "Invalid Request"}}
 	}
+
 	var result interface{}
 	var rpcErr *RPCError
 
@@ -74,22 +79,25 @@ func RPCHandler(req JRPCRequest) *JRPCResponse {
 			}
 		}
 	case "pre":
-		var p []int
-		if err := json.Unmarshal(req.Params, &p); err == nil && len(p) > 0 {
+		var p PrecisionParams
+		if err := json.Unmarshal(req.Params, &p); err != nil || p.N < 0 {
+			rpcErr = &RPCError{-32602, "Invalid parameters"}
+		} else {
 			precisionMutex.Lock()
-			precision = p[0]
+			precision = p.N
 			precisionMutex.Unlock()
-			log.Printf("Note: Precesion set to %d", p[0])
+			log.Printf("Note: Precision set to %d", p.N)
 			result = "ok"
 		}
 	default:
 		rpcErr = &RPCError{-32601, "Method not found"}
 	}
-	if req.Id == nil {
+
+	if req.ID == nil {
 		return nil
 	}
 
-	return &JRPCResponse{JSONRPC: "2.0", ID: req.Id, Result: result, Error: rpcErr}
+	return &JRPCResponse{JSONRPC: "2.0", ID: req.ID, Result: result, Error: rpcErr}
 }
 
 func httpHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,6 +131,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/jrpc", httpHandler).Methods(http.MethodPost)
