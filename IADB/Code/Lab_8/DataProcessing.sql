@@ -1,4 +1,28 @@
 
+begin execute immediate 'drop index idx_storage_places_obj_description'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_products_obj_name'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_storage_places_obj_free_capacity'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_products_obj_total_value'; exception when others then null; end;
+/
+
+begin execute immediate 'drop view storage_places_ov'; exception when others then null; end;
+/
+begin execute immediate 'drop view products_ov'; exception when others then null; end;
+/
+
+begin execute immediate 'drop table storage_places_obj purge'; exception when others then null; end;
+/
+begin execute immediate 'drop table products_obj purge'; exception when others then null; end;
+/
+
+begin execute immediate 'drop type storage_place_t force'; exception when others then null; end;
+/
+begin execute immediate 'drop type product_t force'; exception when others then null; end;
+/
+
 alter session set container = WarehousePDB;
 
 grant create type to Warehouse_Manager;
@@ -12,24 +36,20 @@ where grantee='WAREHOUSE_MANAGER';
 --------STOCKS---------------
 --declaration
 
+
 create or replace type storage_place_t as object(
 	stock_id number,
 	capacity number,
 	filled_part number,
 	description nvarchar2(100),
---additional constuctor
+
 	constructor function storage_place_t(
 		p_capacity number,
 		p_description nvarchar2
 	) return self as result,
 
---comparison method of MAP type
-	map member function sort_key return number,
-
---function as an instance method
-	member function free_capacity return number,
-
---procedure as an instance method
+	map member function sort_key return number deterministic,
+	member function free_capacity return number deterministic,
 	member procedure load_goods(p_amount number)
 );
 /
@@ -39,7 +59,6 @@ create or replace type storage_place_t as object(
 
 create or replace type body storage_place_t as
 
---additional constructor
 	constructor function storage_place_t(
 		p_capacity number,
 		p_description nvarchar2
@@ -53,21 +72,18 @@ create or replace type body storage_place_t as
 		return;
 	end;
 
---comparison method of MAP type
-	map member function sort_key return number
+	map member function sort_key return number deterministic
 	is
 	begin
-		return capacity-filled_part;
+		return self.capacity-self.filled_part;
 	end;
 
---function as an instance method
-	member function free_capacity return number
+	member function free_capacity return number deterministic
 	is
 	begin
-		return capacity-filled_part;
+		return self.capacity-self.filled_part;
 	end;
 
---procedure as an instance method
 	member procedure load_goods(p_amount number)
 	is
 	begin
@@ -75,7 +91,7 @@ create or replace type body storage_place_t as
 			raise_application_error(-20001,'amount must be positive');
 		end if;
 
-		if filled_part+p_amount>capacity then
+		if self.filled_part+p_amount>self.capacity then
 			raise_application_error(-20002,'capacity exceeded');
 		end if;
 
@@ -96,20 +112,14 @@ create or replace type product_t as object(
 	price number(19,4),
 	quantity number,
 
---additional constructor
 	constructor function product_t(
 		p_name nvarchar2,
 		p_price number,
 		p_quantity number
 	) return self as result,
 
---comparison method of type MAP
-	map member function sort_key return number,
-
---function as an instance method
-	member function total_value return number,
-
---procedure as an instance method
+	map member function sort_key return number deterministic,
+	member function total_value return number deterministic,
 	member procedure add_quantity(p_amount number)
 );
 /
@@ -117,7 +127,6 @@ create or replace type product_t as object(
 --implementation
 create or replace type body product_t as
 
---additional constructor
 	constructor function product_t(
 		p_name nvarchar2,
 		p_price number,
@@ -133,21 +142,18 @@ create or replace type body product_t as
 		return;
 	end;
 
---comparison method of type MAP
-	map member function sort_key return number
+	map member function sort_key return number deterministic
 	is
 	begin
-		return price*quantity;
+		return self.price*self.quantity;
 	end;
 
---function as an instance method
-	member function total_value return number
+	member function total_value return number deterministic
 	is
 	begin
-		return price*quantity;
+		return self.price*self.quantity;
 	end;
 
---procedure as an instance method
 	member procedure add_quantity(p_amount number)
 	is
 	begin
@@ -160,6 +166,7 @@ create or replace type body product_t as
 
 end;
 /
+
 
 
 --2: Copy data from relational to object tables
@@ -297,22 +304,77 @@ select * from Stocks where Stock_id=28;
 select * from Products where Product_id=28;
 
 
+--5: demonstrate indxes usage (indexing by attribute, indexing my method in object table)
+begin execute immediate 'drop index idx_storage_places_obj_description'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_products_obj_name'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_storage_places_obj_free_capacity'; exception when others then null; end;
+/
+begin execute immediate 'drop index idx_products_obj_total_value'; exception when others then null; end;
+/
+
+-- index by attribute
+create index idx_storage_places_obj_description
+on storage_places_obj(description);
+/
+
+create index idx_products_obj_name
+on products_obj(name);
+/
+
+-- index by method
+create index idx_storage_places_obj_free_capacity
+on storage_places_obj s (s.free_capacity());
+/   
+
+create index idx_products_obj_total_value
+on products_obj p (p.total_value());
+/
+
+-- sample queries using attribute indexes
+explain plan for
+select *
+from storage_places_obj
+where description='stock 134';
+
+select * from table(dbms_xplan.display);
+/
+
+
+explain plan for
+select *
+from products_obj
+where name='Industrial Cleaning Acid';
+/
+
+select * from table(dbms_xplan.display);
+/
+
+-- sample queries using method indexes
+explain plan for
+select
+	s.stock_id,
+	s.description,
+	s.free_capacity() as free_capacity
+from storage_places_obj s
+where s.free_capacity()>100;
+/
+
+select * from table(dbms_xplan.display);
+/
 
 
 
+explain plan for
+select
+	p.product_id,
+	p.name,
+	p.total_value() as total_value
+from products_obj p
+where p.total_value()>10000;
+/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select * from table(dbms_xplan.display);
+/
 
