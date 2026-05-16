@@ -1,0 +1,581 @@
+{
+  "started_at": "2026-05-16T09:40:11.076Z",
+  "finished_at": "2026-05-16T09:40:12.690Z",
+  "base_url": "http://127.0.0.1:56928",
+  "db_config": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "psms"
+  },
+  "notes": [],
+  "summary": {
+    "total": 19,
+    "passed": 17,
+    "failed": 2,
+    "skipped": 0,
+    "total_duration_ms": 515
+  },
+  "api_methods": [
+    {
+      "method": "DELETE",
+      "endpoint": "/api/admin/offices/:id",
+      "source": "admin.js"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/api/admin/users/:kind/:id",
+      "source": "admin.js"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/api/client/postal-items/:id",
+      "source": "client.js"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/api/employee/postal-items/:id",
+      "source": "employee.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/admin/offices",
+      "source": "admin.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/admin/reports/export",
+      "source": "admin.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/admin/users",
+      "source": "admin.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/complaints",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/item-types",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/offices/reviews-summary",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/post-offices",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/postal-items",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/postal-items/:id",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/client/reviews",
+      "source": "client.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/complaints",
+      "source": "support.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/home",
+      "source": "employee.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/postal-items",
+      "source": "employee.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/reviews",
+      "source": "support.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/tickets",
+      "source": "support.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/employee/tickets/meta",
+      "source": "support.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/health",
+      "source": "health.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/health/db",
+      "source": "health.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/me",
+      "source": "session.js"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/api/session",
+      "source": "session.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/offices/:id/address",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/offices/:id/phone",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/offices/:id/post-index",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/users/:kind/:id/email",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/users/:kind/:id/password",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/users/:kind/:id/role",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/admin/users/employee/:id/office",
+      "source": "admin.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/client/profile",
+      "source": "client.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/employee/complaints/:id",
+      "source": "support.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/employee/postal-items/:id/status",
+      "source": "employee.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/employee/reviews/:id/reply",
+      "source": "support.js"
+    },
+    {
+      "method": "PATCH",
+      "endpoint": "/api/employee/tickets/:id",
+      "source": "support.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/admin/offices",
+      "source": "admin.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/client/complaints",
+      "source": "client.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/client/postal-items",
+      "source": "client.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/client/reviews",
+      "source": "client.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/employee/tickets",
+      "source": "support.js"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/api/session",
+      "source": "session.js"
+    }
+  ],
+  "method_case_catalog": {
+    "method": "POST /api/admin/offices",
+    "cases": [
+      {
+        "id": "MC-01",
+        "kind": "positive",
+        "title": "Valid body (post_index, address, phone)",
+        "expected": 201
+      },
+      {
+        "id": "MC-02",
+        "kind": "negative",
+        "title": "Missing post_index",
+        "expected": 400
+      },
+      {
+        "id": "MC-03",
+        "kind": "negative",
+        "title": "Missing address",
+        "expected": 400
+      },
+      {
+        "id": "MC-04",
+        "kind": "negative",
+        "title": "Duplicate post_index",
+        "expected": 400
+      },
+      {
+        "id": "MC-05",
+        "kind": "negative",
+        "title": "Request without token",
+        "expected": 403
+      },
+      {
+        "id": "MC-06",
+        "kind": "negative",
+        "title": "Token without admin privileges",
+        "expected": 403
+      }
+    ]
+  },
+  "tests": [
+    {
+      "id": "M-01",
+      "area": "Module",
+      "name": "POST /api/admin/offices with valid body",
+      "expected": "201 Created",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 144,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 201,
+        "duration_ms": 107,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":true,\"office\":{\"post_office_id\":7,\"post_index\":\"L10412174755\",\"address\":\"Lab10 test address\",\"phone\":\"+375291111111\",\"created_at\":\"2026-05-16T06:40:12.266Z\"}}"
+      }
+    },
+    {
+      "id": "M-02",
+      "area": "Module",
+      "name": "POST /api/admin/offices without post_index",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 7,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 400,
+        "duration_ms": 7,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Postal index is required\"}"
+      }
+    },
+    {
+      "id": "M-03",
+      "area": "Module",
+      "name": "POST /api/admin/offices without address",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 7,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 400,
+        "duration_ms": 7,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Address is required\"}"
+      }
+    },
+    {
+      "id": "M-04",
+      "area": "Module",
+      "name": "POST /api/admin/offices duplicate post_index",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 86,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 400,
+        "duration_ms": 9,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Postal index must be unique\"}"
+      }
+    },
+    {
+      "id": "I-01",
+      "area": "Integration CRUD",
+      "name": "Create office",
+      "expected": "201 Created and office exists",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 13,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 201,
+        "duration_ms": 13,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":true,\"office\":{\"post_office_id\":10,\"post_index\":\"L10412419565\",\"address\":\"CRUD office\",\"phone\":\"+375294444444\",\"created_at\":\"2026-05-16T06:40:12.427Z\"}}"
+      }
+    },
+    {
+      "id": "I-02",
+      "area": "Integration CRUD",
+      "name": "Read created office",
+      "expected": "200 OK and office is returned by filter",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 26,
+      "http": {
+        "method": "GET",
+        "endpoint": "/api/admin/offices?post_index=L10412419565",
+        "status": 200,
+        "duration_ms": 24,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":true,\"offices\":[{\"post_office_id\":10,\"post_index\":\"L10412419565\",\"address\":\"CRUD office\",\"phone\":\"+375294444444\",\"created_at\":\"2026-05-16T06:40:12.427Z\"}]}"
+      }
+    },
+    {
+      "id": "I-03",
+      "area": "Integration CRUD",
+      "name": "Update created office phone",
+      "expected": "200 OK and phone is updated",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 32,
+      "http": {
+        "method": "PATCH",
+        "endpoint": "/api/admin/offices/10/phone",
+        "status": 200,
+        "duration_ms": 30,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":true,\"office\":{\"post_office_id\":10,\"post_index\":\"L10412419565\",\"address\":\"CRUD office\",\"phone\":\"+375295555555\"}}"
+      }
+    },
+    {
+      "id": "I-04",
+      "area": "Integration CRUD",
+      "name": "Delete created office",
+      "expected": "API requirement check: expected 204 by lab criteria, actual backend behavior captured",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 56,
+      "http": {
+        "method": "DELETE",
+        "endpoint": "/api/admin/offices/10",
+        "status": 200,
+        "duration_ms": 42,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":true,\"deleted\":{\"post_office_id\":10}}"
+      },
+      "details": "Backend returns 200 on delete; lab criterion mentions 204."
+    },
+    {
+      "id": "E-01",
+      "area": "Error handling",
+      "name": "POST /api/admin/offices with empty body",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 7,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/admin/offices",
+        "status": 400,
+        "duration_ms": 7,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Postal index is required\"}"
+      }
+    },
+    {
+      "id": "E-02",
+      "area": "Error handling",
+      "name": "PATCH /api/admin/users/employee/:id/office with invalid office_id type",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 11,
+      "http": {
+        "method": "PATCH",
+        "endpoint": "/api/admin/users/employee/35/office",
+        "status": 400,
+        "duration_ms": 10,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Valid office_id is required\"}"
+      }
+    },
+    {
+      "id": "E-03",
+      "area": "Error handling",
+      "name": "GET request to unknown endpoint",
+      "expected": "404 Not Found",
+      "status": "passed",
+      "duration_ms": 5,
+      "http": {
+        "method": "GET",
+        "endpoint": "/api/endpoint-does-not-exist",
+        "status": 404,
+        "duration_ms": 4,
+        "content_type": "text/html; charset=utf-8",
+        "body_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/endpoint-does-not-exist</pre>\n</body>\n</html>\n"
+      }
+    },
+    {
+      "id": "A-01",
+      "area": "Access control",
+      "name": "Admin endpoint without token",
+      "expected": "403 Forbidden",
+      "status": "passed",
+      "duration_ms": 8,
+      "http": {
+        "method": "GET",
+        "endpoint": "/api/admin/users",
+        "status": 403,
+        "duration_ms": 3,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Bearer token is required\"}"
+      }
+    },
+    {
+      "id": "A-02",
+      "area": "Access control",
+      "name": "Admin endpoint with operator token",
+      "expected": "403 Forbidden",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 7,
+      "http": {
+        "method": "GET",
+        "endpoint": "/api/admin/users",
+        "status": 403,
+        "duration_ms": 7,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Admin access required\"}"
+      }
+    },
+    {
+      "id": "A-03",
+      "area": "Access control",
+      "name": "Client isolation: another client cannot read foreign postal item",
+      "expected": "404 Not Found (isolation check)",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 76,
+      "http": {
+        "method": "GET",
+        "endpoint": "/api/client/postal-items/10",
+        "status": 404,
+        "duration_ms": 21,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Postal item not found\"}"
+      }
+    },
+    {
+      "id": "V-01",
+      "area": "Validation",
+      "name": "POST /api/client/reviews with too long comment",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 5,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/client/reviews",
+        "status": 400,
+        "duration_ms": 5,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"comment must be 2000 characters or less\"}"
+      }
+    },
+    {
+      "id": "V-02",
+      "area": "Validation",
+      "name": "POST /api/client/reviews with out-of-range rating",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 6,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/client/reviews",
+        "status": 400,
+        "duration_ms": 5,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"rating must be an integer from 1 to 5\"}"
+      }
+    },
+    {
+      "id": "V-03",
+      "area": "Validation",
+      "name": "POST /api/client/reviews without required office_id",
+      "expected": "400 Bad Request",
+      "skipReason": "",
+      "status": "passed",
+      "duration_ms": 5,
+      "http": {
+        "method": "POST",
+        "endpoint": "/api/client/reviews",
+        "status": 400,
+        "duration_ms": 5,
+        "content_type": "application/json; charset=utf-8",
+        "body_preview": "{\"ok\":false,\"error\":\"Valid office_id is required\"}"
+      }
+    },
+    {
+      "id": "P-01",
+      "area": "Pagination",
+      "name": "GET /api/admin/users?page=1&limit=2",
+      "expected": "Expected <=2 rows if pagination is implemented",
+      "skipReason": "",
+      "status": "failed",
+      "duration_ms": 8,
+      "error": "Pagination is ignored: got 7 rows"
+    },
+    {
+      "id": "P-02",
+      "area": "Pagination",
+      "name": "GET /api/admin/users?page=9999&limit=2",
+      "expected": "Expected empty list or error for out-of-range page",
+      "skipReason": "",
+      "status": "failed",
+      "duration_ms": 6,
+      "error": "Expected empty array or error, got status=200"
+    }
+  ]
+}

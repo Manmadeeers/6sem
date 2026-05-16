@@ -1,0 +1,2 @@
+Set-Location "C:\Users\Manmade\Desktop\ArchitecturePlanner\backend"
+node --test --experimental-test-coverage --test-coverage-include="engine/*.js" test\unit\*.test.js

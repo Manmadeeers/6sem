@@ -1,0 +1,6 @@
+{"name": "WMF-Last-Access-Global", "value": "16-May-2026", "path": "/", "domain": ".wikipedia.org", "secure": true, "httpOnly": true, "expiry": 1781694615, "sameSite": "None"}
+{"name": "GeoIP", "value": "PL:14:Warsaw:52.24:21.01:v4", "path": "/", "domain": ".wikipedia.org", "secure": true, "httpOnly": false, "sameSite": "None"}
+{"name": "WMF-Uniq", "value": "0reueIkfmaGTZ97j3BmtJQNiAAEBAFvd8iAvHSuCx-A0IR1OQa-996g6UbC1AvID", "path": "/", "domain": ".wikipedia.org", "secure": true, "httpOnly": true, "expiry": 1810464951, "sameSite": "None"}
+{"name": "WMF-Last-Access", "value": "16-May-2026", "path": "/", "domain": "ru.wikipedia.org", "secure": true, "httpOnly": true, "expiry": 1781654401, "sameSite": "None"}
+{"name": "NetworkProbeLimit", "value": "0.001", "path": "/", "domain": "ru.wikipedia.org", "secure": true, "httpOnly": false, "expiry": 1778918290, "sameSite": "None"}
+{"name": "ruwikimwuser-sessionId", "value": "39a5ab26dd03c39c18cf", "path": "/", "domain": "ru.wikipedia.org", "secure": false, "httpOnly": false, "sameSite": "None"}

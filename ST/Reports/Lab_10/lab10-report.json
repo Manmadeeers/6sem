@@ -1,0 +1,411 @@
+{
+  "summary": {
+    "generatedAt": "2026-05-16T08:45:23.601Z",
+    "total": 21,
+    "passed": 21,
+    "failed": 0
+  },
+  "apiMethods": [
+    {
+      "method": "GET",
+      "path": "/api/admin/analytics/overview",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/reports/analytics.pdf",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings/engine",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/settings/engine",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/technologies",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/technologies",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/technologies/:technologyId",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/technologies/:technologyId",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/technology-categories",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/users",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/users/:userId",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:userId",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/users/:userId/role",
+      "source": "backend/src/routes/admin.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "source": "backend/src/routes/auth.js"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/profile",
+      "source": "backend/src/routes/auth.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "source": "backend/src/routes/health.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans",
+      "source": "backend/src/routes/plans.js"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/plans/:planId",
+      "source": "backend/src/routes/plans.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans/:planId",
+      "source": "backend/src/routes/plans.js"
+    },
+    {
+      "method": "POST",
+      "path": "/api/plans/generate",
+      "source": "backend/src/routes/plans.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/plans/recent",
+      "source": "backend/src/routes/plans.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/questionnaire",
+      "source": "backend/src/routes/questionnaire.js"
+    }
+  ],
+  "moduleMethodCaseMatrix": {
+    "method": "GET /api/admin/users",
+    "positive": [
+      {
+        "id": "POS-1",
+        "description": "Valid admin token is provided in Authorization header.",
+        "expectedStatus": 200
+      },
+      {
+        "id": "POS-2",
+        "description": "Request contains additional optional headers (Accept, X-Trace-Id).",
+        "expectedStatus": 200
+      }
+    ],
+    "negative": [
+      {
+        "id": "NEG-1",
+        "description": "Authorization header is missing.",
+        "expectedStatus": 403
+      },
+      {
+        "id": "NEG-2",
+        "description": "Authorization token is invalid or unknown.",
+        "expectedStatus": 403
+      },
+      {
+        "id": "NEG-3",
+        "description": "Authenticated non-admin user requests admin endpoint.",
+        "expectedStatus": 403
+      }
+    ]
+  },
+  "notes": [
+    "Protected routes were tested with deterministic mock auth middleware to validate access control scenarios.",
+    "Pagination is implemented via limit/offset in this API (not page/limit).",
+    "User create endpoint is implemented as PATCH /api/auth/profile for first-time authenticated subject sync."
+  ],
+  "tests": [
+    {
+      "id": "M01",
+      "section": "module:get-methods",
+      "description": "List available API methods from backend source",
+      "status": "passed",
+      "durationMs": 0,
+      "details": {
+        "totalMethods": 22
+      }
+    },
+    {
+      "id": "M02",
+      "section": "module:users-positive-negative",
+      "description": "GET /api/admin/users with valid admin token returns list",
+      "status": "passed",
+      "durationMs": 78,
+      "details": {
+        "httpStatus": 200,
+        "usersCount": 3
+      }
+    },
+    {
+      "id": "M03",
+      "section": "module:users-positive-negative",
+      "description": "GET /api/admin/users without token is forbidden",
+      "status": "passed",
+      "durationMs": 7,
+      "details": {
+        "httpStatus": 403,
+        "error": "Forbidden: missing bearer token."
+      }
+    },
+    {
+      "id": "M04",
+      "section": "module:users-positive-negative",
+      "description": "GET /api/admin/users with non-admin token is forbidden",
+      "status": "passed",
+      "durationMs": 4,
+      "details": {
+        "httpStatus": 403,
+        "error": "Admin access is required for this route."
+      }
+    },
+    {
+      "id": "I01",
+      "section": "integration:users-crud",
+      "description": "Create user via PATCH /api/auth/profile",
+      "status": "passed",
+      "durationMs": 31,
+      "details": {
+        "httpStatus": 200,
+        "createdUserId": 4
+      }
+    },
+    {
+      "id": "I02",
+      "section": "integration:users-crud",
+      "description": "Read created user via GET /api/admin/users",
+      "status": "passed",
+      "durationMs": 3,
+      "details": {
+        "httpStatus": 200,
+        "createdUser": {
+          "id": 4,
+          "auth0Sub": "auth0|crud-created-user",
+          "email": "created.user@example.com",
+          "displayName": "Created User",
+          "role": "user",
+          "createdAt": "2026-05-16T08:45:27.537Z",
+          "projectCount": 0
+        }
+      }
+    },
+    {
+      "id": "I03",
+      "section": "integration:users-crud",
+      "description": "Update created user via PATCH /api/admin/users/:id",
+      "status": "passed",
+      "durationMs": 5,
+      "details": {
+        "httpStatus": 200,
+        "user": {
+          "id": 4,
+          "auth0Sub": "auth0|crud-created-user",
+          "email": "created.user+updated@example.com",
+          "displayName": "Created User Updated",
+          "role": "user",
+          "createdAt": "2026-05-16T08:45:27.537Z"
+        }
+      }
+    },
+    {
+      "id": "I04",
+      "section": "integration:users-crud",
+      "description": "Delete created user via DELETE /api/admin/users/:id",
+      "status": "passed",
+      "durationMs": 4,
+      "details": {
+        "deleteStatus": 200,
+        "existsAfterDelete": false
+      }
+    },
+    {
+      "id": "E01",
+      "section": "errors",
+      "description": "POST /api/plans/generate with empty body returns 400",
+      "status": "passed",
+      "durationMs": 6,
+      "details": {
+        "httpStatus": 400,
+        "error": "Invalid plan input"
+      }
+    },
+    {
+      "id": "E02",
+      "section": "errors",
+      "description": "DELETE request to non-existing endpoint returns 404",
+      "status": "passed",
+      "durationMs": 3,
+      "details": {
+        "httpStatus": 404,
+        "error": "Not found"
+      }
+    },
+    {
+      "id": "E03",
+      "section": "errors",
+      "description": "PATCH /api/admin/users/not-a-number returns validation error 400",
+      "status": "passed",
+      "durationMs": 2,
+      "details": {
+        "httpStatus": 400,
+        "error": "User id must be a valid integer."
+      }
+    },
+    {
+      "id": "A01",
+      "section": "access",
+      "description": "Protected endpoint without token is forbidden",
+      "status": "passed",
+      "durationMs": 1,
+      "details": {
+        "httpStatus": 403,
+        "error": "Forbidden: missing bearer token."
+      }
+    },
+    {
+      "id": "A02",
+      "section": "access",
+      "description": "User token cannot access admin functions",
+      "status": "passed",
+      "durationMs": 2,
+      "details": {
+        "httpStatus": 403,
+        "error": "Admin access is required for this route."
+      }
+    },
+    {
+      "id": "A03",
+      "section": "access",
+      "description": "User cannot access another user's plan",
+      "status": "passed",
+      "durationMs": 6,
+      "details": {
+        "generateStatus": 200,
+        "forbiddenStatus": 404,
+        "planId": "private-plan-a1-mp83pfqn-jm8zu1"
+      }
+    },
+    {
+      "id": "V01",
+      "section": "validation",
+      "description": "POST /api/plans/generate with missing required field returns 400",
+      "status": "passed",
+      "durationMs": 2,
+      "details": {
+        "httpStatus": 400,
+        "details": [
+          "projectName is required"
+        ]
+      }
+    },
+    {
+      "id": "V02",
+      "section": "validation",
+      "description": "POST /api/plans/generate with number out of range returns 400",
+      "status": "passed",
+      "durationMs": 2,
+      "details": {
+        "httpStatus": 400,
+        "details": [
+          "monthlyBudget must be a valid number"
+        ]
+      }
+    },
+    {
+      "id": "V03",
+      "section": "validation",
+      "description": "POST /api/plans/generate with invalid type returns 400",
+      "status": "passed",
+      "durationMs": 2,
+      "details": {
+        "httpStatus": 400,
+        "details": [
+          "monthlyUsers must be a valid number"
+        ]
+      }
+    },
+    {
+      "id": "V04",
+      "section": "validation",
+      "description": "POST /api/plans/generate with very long project name is accepted (no max length validation)",
+      "status": "passed",
+      "durationMs": 4,
+      "details": {
+        "httpStatus": 200,
+        "note": "API currently does not enforce maximum length for projectName."
+      }
+    },
+    {
+      "id": "P01",
+      "section": "pagination",
+      "description": "GET /api/plans with limit/offset returns first page",
+      "status": "passed",
+      "durationMs": 15,
+      "details": {
+        "httpStatus": 200,
+        "returnedCount": 2
+      }
+    },
+    {
+      "id": "P02",
+      "section": "pagination",
+      "description": "GET /api/plans with next offset returns another page",
+      "status": "passed",
+      "durationMs": 3,
+      "details": {
+        "page1FirstPlanId": "paginated-plan-5-mp83pfrc-q9mr7z",
+        "page2FirstPlanId": "paginated-plan-3-mp83pfr7-d35lzu"
+      }
+    },
+    {
+      "id": "P03",
+      "section": "pagination",
+      "description": "GET /api/plans with out-of-range offset returns empty array",
+      "status": "passed",
+      "durationMs": 1,
+      "details": {
+        "httpStatus": 200,
+        "returnedCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,547 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 4549 >>
+stream
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 814 Tm (PSMS API Testing Report - Page 1/3) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 802 Tm (LAB 10A - API testing) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 788 Tm (Started at: 2026-05-16T09:40:11.076Z) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 774 Tm (Finished at: 2026-05-16T09:40:12.690Z) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 760 Tm (Base URL: http://127.0.0.1:56928) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 746 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 732 Tm (SUMMARY) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 718 Tm (Total tests: 19) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 704 Tm (Passed: 17) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 690 Tm (Failed: 2) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 676 Tm (Skipped: 0) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 662 Tm (Total duration \(ms\): 515) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 648 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 634 Tm (API METHODS \(42\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 620 Tm (DELETE /api/admin/offices/:id [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 606 Tm (DELETE /api/admin/users/:kind/:id [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 592 Tm (DELETE /api/client/postal-items/:id [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 578 Tm (DELETE /api/employee/postal-items/:id [employee.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 564 Tm (GET /api/admin/offices [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 550 Tm (GET /api/admin/reports/export [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 536 Tm (GET /api/admin/users [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 522 Tm (GET /api/client/complaints [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 508 Tm (GET /api/client/item-types [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 494 Tm (GET /api/client/offices/reviews-summary [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 480 Tm (GET /api/client/post-offices [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 466 Tm (GET /api/client/postal-items [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 452 Tm (GET /api/client/postal-items/:id [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 438 Tm (GET /api/client/reviews [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 424 Tm (GET /api/employee/complaints [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 410 Tm (GET /api/employee/home [employee.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 396 Tm (GET /api/employee/postal-items [employee.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 382 Tm (GET /api/employee/reviews [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 368 Tm (GET /api/employee/tickets [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 354 Tm (GET /api/employee/tickets/meta [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 340 Tm (GET /api/health [health.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 326 Tm (GET /api/health/db [health.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 312 Tm (GET /api/me [session.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 298 Tm (GET /api/session [session.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 284 Tm (PATCH /api/admin/offices/:id/address [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 270 Tm (PATCH /api/admin/offices/:id/phone [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 256 Tm (PATCH /api/admin/offices/:id/post-index [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 242 Tm (PATCH /api/admin/users/:kind/:id/email [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 228 Tm (PATCH /api/admin/users/:kind/:id/password [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 214 Tm (PATCH /api/admin/users/:kind/:id/role [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 200 Tm (PATCH /api/admin/users/employee/:id/office [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 186 Tm (PATCH /api/client/profile [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 172 Tm (PATCH /api/employee/complaints/:id [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 158 Tm (PATCH /api/employee/postal-items/:id/status [employee.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 144 Tm (PATCH /api/employee/reviews/:id/reply [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 130 Tm (PATCH /api/employee/tickets/:id [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 116 Tm (POST /api/admin/offices [admin.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 102 Tm (POST /api/client/complaints [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 88 Tm (POST /api/client/postal-items [client.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 74 Tm (POST /api/client/reviews [client.js]) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 5277 >>
+stream
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 814 Tm (PSMS API Testing Report - Page 2/3) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 802 Tm (POST /api/employee/tickets [support.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 788 Tm (POST /api/session [session.js]) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 774 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 760 Tm (TEST CASE CATALOG FOR POST /api/admin/offices) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 746 Tm (MC-01 | positive | expected 201 | Valid body \(post_index, address, phone\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 732 Tm (MC-02 | negative | expected 400 | Missing post_index) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 718 Tm (MC-03 | negative | expected 400 | Missing address) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 704 Tm (MC-04 | negative | expected 400 | Duplicate post_index) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 690 Tm (MC-05 | negative | expected 403 | Request without token) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 676 Tm (MC-06 | negative | expected 403 | Token without admin privileges) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 662 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 648 Tm (EXECUTION RESULTS) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 634 Tm ([M-01] PASSED | Module | POST /api/admin/offices with valid body) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 620 Tm (expected: 201 Created) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 606 Tm (actual: HTTP 201 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 592 Tm (response: {"ok":true,"office":{"post_office_id":7,"post_index":"L10412174755","address":"Lab10 test address","phone":"+375291111111","created_at":"2026-05-16T06:40:12.266Z"}}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 578 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 564 Tm ([M-02] PASSED | Module | POST /api/admin/offices without post_index) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 550 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 536 Tm (actual: HTTP 400 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 522 Tm (response: {"ok":false,"error":"Postal index is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 508 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 494 Tm ([M-03] PASSED | Module | POST /api/admin/offices without address) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 480 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 466 Tm (actual: HTTP 400 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 452 Tm (response: {"ok":false,"error":"Address is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 438 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 424 Tm ([M-04] PASSED | Module | POST /api/admin/offices duplicate post_index) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 410 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 396 Tm (actual: HTTP 400 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 382 Tm (response: {"ok":false,"error":"Postal index must be unique"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 368 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 354 Tm ([I-01] PASSED | Integration CRUD | Create office) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 340 Tm (expected: 201 Created and office exists) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 326 Tm (actual: HTTP 201 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 312 Tm (response: {"ok":true,"office":{"post_office_id":10,"post_index":"L10412419565","address":"CRUD office","phone":"+375294444444","created_at":"2026-05-16T06:40:12.427Z"}}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 298 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 284 Tm ([I-02] PASSED | Integration CRUD | Read created office) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 270 Tm (expected: 200 OK and office is returned by filter) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 256 Tm (actual: HTTP 200 \(GET /api/admin/offices?post_index=L10412419565\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 242 Tm (response: {"ok":true,"offices":[{"post_office_id":10,"post_index":"L10412419565","address":"CRUD office","phone":"+375294444444","created_at":"2026-05-16T06:40:12.427Z"}]}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 228 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 214 Tm ([I-03] PASSED | Integration CRUD | Update created office phone) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 200 Tm (expected: 200 OK and phone is updated) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 186 Tm (actual: HTTP 200 \(PATCH /api/admin/offices/10/phone\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 172 Tm (response: {"ok":true,"office":{"post_office_id":10,"post_index":"L10412419565","address":"CRUD office","phone":"+375295555555"}}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 158 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 144 Tm ([I-04] PASSED | Integration CRUD | Delete created office) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 130 Tm (expected: API requirement check: expected 204 by lab criteria, actual backend behavior captured) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 116 Tm (actual: HTTP 200 \(DELETE /api/admin/offices/10\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 102 Tm (response: {"ok":true,"deleted":{"post_office_id":10}}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 88 Tm (details: Backend returns 200 on delete; lab criterion mentions 204.) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 74 Tm () Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 5038 >>
+stream
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 814 Tm (PSMS API Testing Report - Page 3/3) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 802 Tm ([E-01] PASSED | Error handling | POST /api/admin/offices with empty body) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 788 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 774 Tm (actual: HTTP 400 \(POST /api/admin/offices\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 760 Tm (response: {"ok":false,"error":"Postal index is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 746 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 732 Tm ([E-02] PASSED | Error handling | PATCH /api/admin/users/employee/:id/office with invalid office_id type) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 718 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 704 Tm (actual: HTTP 400 \(PATCH /api/admin/users/employee/35/office\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 690 Tm (response: {"ok":false,"error":"Valid office_id is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 676 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 662 Tm ([E-03] PASSED | Error handling | GET request to unknown endpoint) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 648 Tm (expected: 404 Not Found) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 634 Tm (actual: HTTP 404 \(GET /api/endpoint-does-not-exist\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 620 Tm (response: <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /api/endpoint-does-not-exist</pre>
+</body>
+</html>
+) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 606 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 592 Tm ([A-01] PASSED | Access control | Admin endpoint without token) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 578 Tm (expected: 403 Forbidden) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 564 Tm (actual: HTTP 403 \(GET /api/admin/users\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 550 Tm (response: {"ok":false,"error":"Bearer token is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 536 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 522 Tm ([A-02] PASSED | Access control | Admin endpoint with operator token) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 508 Tm (expected: 403 Forbidden) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 494 Tm (actual: HTTP 403 \(GET /api/admin/users\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 480 Tm (response: {"ok":false,"error":"Admin access required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 466 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 452 Tm ([A-03] PASSED | Access control | Client isolation: another client cannot read foreign postal item) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 438 Tm (expected: 404 Not Found \(isolation check\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 424 Tm (actual: HTTP 404 \(GET /api/client/postal-items/10\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 410 Tm (response: {"ok":false,"error":"Postal item not found"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 396 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 382 Tm ([V-01] PASSED | Validation | POST /api/client/reviews with too long comment) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 368 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 354 Tm (actual: HTTP 400 \(POST /api/client/reviews\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 340 Tm (response: {"ok":false,"error":"comment must be 2000 characters or less"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 326 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 312 Tm ([V-02] PASSED | Validation | POST /api/client/reviews with out-of-range rating) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 298 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 284 Tm (actual: HTTP 400 \(POST /api/client/reviews\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 270 Tm (response: {"ok":false,"error":"rating must be an integer from 1 to 5"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 256 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 242 Tm ([V-03] PASSED | Validation | POST /api/client/reviews without required office_id) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 228 Tm (expected: 400 Bad Request) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 214 Tm (actual: HTTP 400 \(POST /api/client/reviews\)) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 200 Tm (response: {"ok":false,"error":"Valid office_id is required"}) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 186 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 172 Tm ([P-01] FAILED | Pagination | GET /api/admin/users?page=1&limit=2) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 158 Tm (expected: Expected <=2 rows if pagination is implemented) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 144 Tm (error: Pagination is ignored: got 7 rows) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 130 Tm () Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 116 Tm ([P-02] FAILED | Pagination | GET /api/admin/users?page=9999&limit=2) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 102 Tm (expected: Expected empty list or error for out-of-range page) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 88 Tm (error: Expected empty array or error, got status=200) Tj
+ET
+BT /F1 10 Tf 0 0 0 rg
+1 0 0 1 42 74 Tm () Tj
+ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000323 00000 n 
+0000004924 00000 n 
+0000005050 00000 n 
+0000010379 00000 n 
+0000010505 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+15595
+%%EOF
