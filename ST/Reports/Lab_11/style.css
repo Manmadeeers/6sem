@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+:root {
+    --bg-start: #fdf2e9;
+    --bg-end: #d7ebff;
+    --card-bg: rgba(255, 255, 255, 0.88);
+    --card-border: rgba(0, 0, 0, 0.08);
+    --text-main: #1d1f2a;
+    --text-muted: #5f6677;
+    --accent: #0d8b9f;
+    --accent-strong: #0a6d7d;
+    --input-bg: #ffffff;
+    --input-border: #ced5e3;
+    --shadow: 0 24px 50px rgba(19, 28, 56, 0.12);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+    color: var(--text-main);
+    background:
+        radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.8), transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.55), transparent 32%),
+        linear-gradient(130deg, var(--bg-start), var(--bg-end));
+}
+
+form {
+    width: min(100%, 470px);
+    display: grid;
+    gap: 18px;
+    padding: 30px 28px;
+    border: 1px solid var(--card-border);
+    border-radius: 22px;
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+}
+
+.form-group {
+    display: grid;
+    gap: 8px;
+}
+
+label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--text-muted);
+}
+
+input {
+    width: 100%;
+    border: 1.5px solid var(--input-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+    color: var(--text-main);
+    background: var(--input-bg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+input::placeholder {
+    color: #96a0b3;
+}
+
+input:hover {
+    border-color: #aeb9cf;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(13, 139, 159, 0.16);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 520px) {
+    body {
+        padding: 14px;
+    }
+
+    form {
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+    input {
+        padding: 11px 12px;
+    }
+}
