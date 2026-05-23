@@ -7,9 +7,9 @@ app.use(express.json());
 
 const dbConfig = {
     user: 'sa',
-    password: '!StrongPass123',
+    password: '!StrongPassword_123',
     server: 'localhost',
-    port:1444,
+    port:1434,
     database: 'Celebrities',
     options: {
         encrypt: true,

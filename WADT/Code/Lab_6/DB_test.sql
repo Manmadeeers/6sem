@@ -1,6 +1,8 @@
 create database Celebrities;
 
 use Celebrities;
+go
+
 
 
 create table Celebrities(
