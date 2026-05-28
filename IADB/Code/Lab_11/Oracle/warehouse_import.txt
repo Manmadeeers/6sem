@@ -1,0 +1,5 @@
+product_name;stock_description;unit_price;product_quantity;load_date
+Printer paper;Main stock A;12.56;100.49;2026-05-01
+usb cable;Main stock B;8.94;250.21;2026-05-03
+Keyboard;Reserve stock;45.08;40.67;2026-05-05
+mouse;Main stock A;18.75;75.44;2026-05-07
