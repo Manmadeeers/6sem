@@ -99,6 +99,7 @@ const openAPISpec = `{
         ],
         "responses": {
           "200": {
+          
             "description": "OK",
             "content": {
               "application/json": {
