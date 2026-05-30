@@ -9,6 +9,8 @@ create table Celebrities(
     FullName varchar(100) not null,
     Nationality varchar(100) not null,
     ReqPhotoPath varchar(500) not null
+
+    
 );
 
 go
