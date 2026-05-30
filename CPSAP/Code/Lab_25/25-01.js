@@ -1,6 +1,7 @@
 const jrpc = require('json-rpc-2.0');
 const express = require('express');
 const bodyParser = require('body-parser');
+
 const PORT = 3000;
 
 const server = new jrpc.JSONRPCServer();
