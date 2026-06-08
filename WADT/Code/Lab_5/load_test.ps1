@@ -6,7 +6,7 @@ $errors = 0
 $start = Get-Date
 
 foreach ($method in $methods) {
-    for ($i = 1; $i -le 50; $i++) {
+    for ($i = 1; $i -le 10; $i++) {
         try {
             $resp = Invoke-RestMethod -Method $method -Uri $gateway -ErrorAction Stop
             $results += [pscustomobject]@{ Nick = $resp.nick; Method = $resp.method }

@@ -1,11 +1,11 @@
-create database Celebrities;
+create database if not exists Celebrities;
 
 use Celebrities;
 go
 
 
 
-create table Celebrities(
+create table if not exists Celebrities(
 	Id int identity(1,1) not null,
 	FullName nvarchar(50) not null,
 	Nationality nvarchar(2) not null,
@@ -13,17 +13,17 @@ create table Celebrities(
 	constraint PK_Celebrities primary key clustered (Id asc)
 );
 
-select * from Celebrities;
+-- select * from Celebrities;
 
-insert into Celebrities values
-('Linus Torvalds','FN','NO'),
-('Steve Jobs','US','NO'),
-('Smelov','BY','NO');
+-- insert into Celebrities values
+-- ('Linus Torvalds','FN','NO'),
+-- ('Steve Jobs','US','NO'),
+-- ('Smelov','BY','NO');
 
-update Celebrities
-set FullName='Smelov V.V.'
-where id =3;
+-- update Celebrities
+-- set FullName='Smelov V.V.'
+-- where id =3;
 
-insert into Celebrities values ('Test','NO','NO');
+-- insert into Celebrities values ('Test','NO','NO');
 
-delete from Celebrities where id=4;
+-- delete from Celebrities where id=4;

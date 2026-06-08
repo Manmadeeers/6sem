@@ -1,0 +1,32 @@
+services:
+  static_sync:
+    image: alpine:3.20
+    container_name: lab3_static_sync
+    command: >
+      sh -c "cp /src/TDWA03-01.html /output/TDWA03-01.html &&
+             cp /src/TDWA03-01.css /output/TDWA03-01.css &&
+             cp /src/TDWA03-01.js /output/TDWA03-01.js"
+    volumes:
+      - ./:/src:ro
+      - static_html:/output
+    restart: "no"
+
+  nginx:
+    image: nginx:alpine
+    container_name: lab3_nginx_proxy
+    depends_on:
+      static_sync:
+        condition: service_completed_successfully
+    ports:
+      - "20443:20443"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl/nginx.crt:/etc/nginx/ssl/nginx-selfsigned.crt:ro
+      - ./ssl/nginx.key:/etc/nginx/ssl/nginx-selfsigned.key:ro
+      - static_html:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+volumes:
+  static_html:

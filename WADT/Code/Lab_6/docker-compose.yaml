@@ -2,6 +2,9 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql2019
+    entrypoint:
+      - /bin/bash
+      - /var/opt/mssql/init/entrypoint.sh
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
@@ -13,6 +16,8 @@ services:
       - ./mssql/data:/var/opt/mssql/data
       - ./mssql/log:/var/opt/mssql/log
       - ./mssql/secrets:/var/opt/mssql/secrets
+      - ./mssql/init-db.sql:/var/opt/mssql/init/init-db.sql:ro
+      - ./mssql/entrypoint.sh:/var/opt/mssql/init/entrypoint.sh:ro
     networks:
       - backend
 

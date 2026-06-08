@@ -1,19 +1,33 @@
-create database Celebrities;
-go
+IF DB_ID(N'Celebrities') IS NULL
+BEGIN
+    CREATE DATABASE [Celebrities];
+END
+GO
 
-use Celebrities;
-go
+USE [Celebrities];
+GO
 
-create table Celebrities(
-    Id int identity(1,1) primary key,
-    FullName varchar(100) not null,
-    Nationality varchar(100) not null,
-    ReqPhotoPath varchar(500) not null
+IF OBJECT_ID(N'dbo.Celebrities', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[Celebrities] (
+        [Id] INT IDENTITY(1,1) NOT NULL,
+        [FullName] NVARCHAR(100) NOT NULL,
+        [Nationality] NVARCHAR(100) NOT NULL,
+        [ReqPhotoPath] NVARCHAR(500) NOT NULL,
+        CONSTRAINT [PK_Celebrities] PRIMARY KEY CLUSTERED ([Id] ASC)
+    );
+END
+GO
 
-    
-);
-
-go
-
-insert into Celebrities (FullName,Nationality,ReqPhotoPath) values ('Smelov V.V.','BY','NO');
-go
+IF NOT EXISTS (
+    SELECT 1
+    FROM [dbo].[Celebrities]
+    WHERE [FullName] = N'Smelov V.V.'
+      AND [Nationality] = N'BY'
+      AND [ReqPhotoPath] = N'NO'
+)
+BEGIN
+    INSERT INTO [dbo].[Celebrities] ([FullName], [Nationality], [ReqPhotoPath])
+    VALUES (N'Smelov V.V.', N'BY', N'NO');
+END
+GO

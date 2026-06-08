@@ -20,9 +20,7 @@
       "UpstreamPathTemplate": "/lb",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "LoadBalancerOptions": {
-        "Type": "CookieStickySessions",
-        "Key": "ocelot-sticky",
-        "Expiry": 300
+        "Type": "CustomWeightedLoadBalancer"
       }
     }
   ]

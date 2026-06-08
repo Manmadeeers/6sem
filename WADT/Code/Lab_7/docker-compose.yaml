@@ -2,11 +2,16 @@ services:
   mssql_2019:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql_2019
+    entrypoint:
+      - /bin/bash
+      - /var/opt/mssql/entrypoint.sh
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "!StrongPass123"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./mssql_data/db_init.sql:/var/opt/mssql/db_init.sql:ro
+      - ./mssql_data/entrypoint.sh:/var/opt/mssql/entrypoint.sh:ro
     networks:
       - tdwa_net
 

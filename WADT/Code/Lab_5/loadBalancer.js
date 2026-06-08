@@ -23,7 +23,6 @@ function pickTarget() {
 
 
 const server = http.createServer((req, res) => {
-  // Разрешаем только /lb
   if (!req.url.startsWith('/lb')) {
     res.statusCode = 404;
     res.end('Not Found');

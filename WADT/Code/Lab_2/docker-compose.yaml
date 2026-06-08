@@ -1,0 +1,52 @@
+services:
+  static_sync:
+    image: alpine:3.20
+    container_name: lab2_static_sync
+    command: >
+      sh -c "cp /src/TDWA02-01.html /output/TDWA02-01.html &&
+             cp /src/TDWA02-01.css /output/TDWA02-01.css &&
+             cp /src/TDWA02-01.js /output/TDWA02-01.js"
+    volumes:
+      - ./:/src:ro
+      - spa_dist:/output
+    restart: "no"
+
+  spa_builder:
+    image: node:20-alpine
+    container_name: lab2_spa_builder
+    working_dir: /work
+    command: >
+      sh -c "mkdir -p /output/spa &&
+             cp /src/package.json /src/package-lock.json /src/index.html /src/vite.config.js /src/eslint.config.js /work &&
+             cp -r /src/public /work/public &&
+             cp -r /src/src /work/src &&
+             npm ci &&
+             npm run build &&
+             rm -rf /output/spa/* &&
+             cp -r dist/. /output/spa/"
+    volumes:
+      - ./SPA/TDWA02-02:/src:ro
+      - spa_dist:/output
+      - spa_npm_cache:/root/.npm
+    restart: "no"
+
+  nginx:
+    image: nginx:alpine
+    container_name: lab2_nginx_proxy
+    depends_on:
+      static_sync:
+        condition: service_completed_successfully
+      spa_builder:
+        condition: service_completed_successfully
+    ports:
+      - "20000:20000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - spa_dist:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+volumes:
+  spa_dist:
+  spa_npm_cache:
